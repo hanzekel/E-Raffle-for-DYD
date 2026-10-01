@@ -1,0 +1,80 @@
+// ============================================================
+// DYD26 Raffle — Prisma Database Schema
+// ============================================================
+// Run migrations:  npx prisma migrate dev --name init
+// Generate client: npx prisma generate
+// View data:       npx prisma studio
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// A single registration (1 person, 1–10 tickets, 1 payment).
+model Registration {
+  id                String   @id @default(uuid())
+  fullName          String   @db.VarChar(100)
+  email             String   @db.VarChar(255)
+  contactNumber     String   @db.VarChar(15)
+  campName          String   @db.VarChar(100)
+  ticketCount       Int
+  totalAmount       Decimal  @db.Decimal(10, 2)
+  paymentMethod     String   @db.VarChar(10) // "gcash" | "bank"
+  referenceNumber   String   @unique @db.VarChar(30)
+  proofOfPaymentUrl String
+  status            String   @default("pending") @db.VarChar(10) // "pending" | "approved" | "rejected"
+  rejectionNote     String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tickets Ticket[]
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+}
+
+/// An individual raffle ticket linked to a registration.
+/// One registration → many tickets (1 per ticketCount).
+model Ticket {
+  id             String       @id @default(uuid())
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  ticketNumber   String       @unique @db.VarChar(17) // "DYD26-" + 8 hex chars = 14, allow margin
+  qrCodeData     String       @db.Text
+  pdfUrl         String
+  createdAt      DateTime     @default(now())
+
+  @@index([registrationId])
+  @@index([ticketNumber])
+}
+
+/// Tracks admin JWT sessions for validation and revocation.
+model AdminSession {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([token])
+  @@index([expiresAt])
+}
+
+/// Database-backed rate limiting for serverless environments.
+/// Each row = one rate-limit window for a specific IP + endpoint key.
+model RateLimitEntry {
+  id          String   @id @default(uuid())
+  /// Composite key: e.g. "POST:/api/register:192.168.1.1"
+  key         String   @unique @db.VarChar(255)
+  hitCount    Int      @default(1)
+  windowStart DateTime @default(now())
+
+  @@index([key])
+  @@index([windowStart])
+}
