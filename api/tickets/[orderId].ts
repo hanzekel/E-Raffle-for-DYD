@@ -5,7 +5,7 @@ import { prisma } from '../_lib/prisma';
 import { getSignedUrl } from '../_lib/supabase';
 
 async function handler(req: any, res: any) {
-  const { orderId } = req.query;
+  const orderId = req.query.orderId || req.params?.orderId || req.query.id || req.params?.id;
   const token = req.query.token as string;
 
   if (!token) {
@@ -18,6 +18,8 @@ async function handler(req: any, res: any) {
   } catch (err) {
     throw new ApiError(401, 'Invalid or expired verification token', 'INVALID_TOKEN');
   }
+
+  console.log('decoded.orderId:', decoded.orderId, 'req.query.orderId:', orderId);
 
   if (decoded.orderId !== orderId) {
     throw new ApiError(403, 'Token does not match this order', 'TOKEN_MISMATCH');
@@ -66,4 +68,8 @@ async function handler(req: any, res: any) {
 
 export default withMiddleware(handler, {
   methods: ['GET'],
+  rateLimit: {
+    max: 30,
+    windowMinutes: 10,
+  },
 });

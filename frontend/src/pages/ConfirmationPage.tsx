@@ -8,7 +8,7 @@ export const ConfirmationPage: React.FC = () => {
   if (!id) return <Navigate to="/" />;
 
   return (
-    <div className="container mx-auto px-4 py-16 sm:py-32 max-w-xl flex flex-col items-center justify-center animate-appear">
+    <div className="container mx-auto px-4 py-8 sm:py-14 max-w-lg flex flex-col items-center justify-center animate-appear">
       
       {/* Background celebration glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-radial-gradient from-green-500/20 to-transparent opacity-50 blur-3xl pointer-events-none"></div>

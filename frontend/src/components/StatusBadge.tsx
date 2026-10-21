@@ -1,3 +1,4 @@
+// Status indicator badge
 import React from 'react';
 
 interface Props {
@@ -6,13 +7,13 @@ interface Props {
 
 export const StatusBadge: React.FC<Props> = ({ status }) => {
   const styles = {
-    pending: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    approved: 'bg-green-500/20 text-green-400 border-green-500/30',
-    rejected: 'bg-red-500/20 text-red-400 border-red-500/30',
+    pending: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
+    approved: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20',
+    rejected: 'bg-rose-500/10 text-rose-700 border-rose-500/20',
   };
 
   return (
-    <span className={`px-3 py-1 rounded-full border text-xs font-bold uppercase tracking-wider ${styles[status]}`}>
+    <span className={`px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border text-[10px] sm:text-xs font-bold uppercase tracking-wider ${styles[status]}`}>
       {status}
     </span>
   );

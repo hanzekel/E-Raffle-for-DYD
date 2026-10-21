@@ -13,36 +13,43 @@ export interface MiddlewareOptions {
 }
 
 export async function checkRateLimit(key: string, max: number, windowMinutes: number): Promise<void> {
-  // Bypass rate limiting for local dev if no DB is connected
+  // Bypass rate limiting if no DB configured
   if (!process.env.DATABASE_URL) {
-    console.warn('Bypassing rate limit (No DATABASE_URL configured)');
     return;
   }
-  const now = new Date();
-  const windowStart = new Date(now.getTime() - windowMinutes * 60 * 1000);
 
-  const entry = await prisma.rateLimitEntry.findUnique({ where: { key } });
+  try {
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - windowMinutes * 60 * 1000);
 
-  if (entry) {
-    if (entry.windowStart < windowStart) {
-      // Window expired, reset
-      await prisma.rateLimitEntry.update({
-        where: { key },
-        data: { hitCount: 1, windowStart: now },
-      });
-    } else {
-      if (entry.hitCount >= max) {
-        throw new ApiError(429, 'Rate limit exceeded', 'RATE_LIMIT_EXCEEDED');
+    const entry = await prisma.rateLimitEntry.findUnique({ where: { key } });
+
+    if (entry) {
+      if (entry.windowStart < windowStart) {
+        // Window expired, reset
+        await prisma.rateLimitEntry.update({
+          where: { key },
+          data: { hitCount: 1, windowStart: now },
+        });
+      } else {
+        if (entry.hitCount >= max) {
+          throw new ApiError(429, 'Rate limit exceeded', 'RATE_LIMIT_EXCEEDED');
+        }
+        await prisma.rateLimitEntry.update({
+          where: { key },
+          data: { hitCount: entry.hitCount + 1 },
+        });
       }
-      await prisma.rateLimitEntry.update({
-        where: { key },
-        data: { hitCount: entry.hitCount + 1 },
+    } else {
+      await prisma.rateLimitEntry.create({
+        data: { key, hitCount: 1, windowStart: now },
       });
     }
-  } else {
-    await prisma.rateLimitEntry.create({
-      data: { key, hitCount: 1, windowStart: now },
-    });
+  } catch (err) {
+    // If ApiError (e.g. 429), rethrow
+    if (err instanceof ApiError) throw err;
+    // Otherwise if database is temporarily unreachable, fail-open gracefully so users aren't blocked
+    console.warn('Rate limit storage unreachable, failing open gracefully.');
   }
 }
 
@@ -50,11 +57,26 @@ export function withMiddleware(handler: VercelApiHandler, options: MiddlewareOpt
   return async (req: VercelRequest, res: VercelResponse) => {
     try {
       // 1. CORS setup
-      const origin = process.env.FRONTEND_URL || 'http://localhost:5173';
-      res.setHeader('Access-Control-Allow-Origin', origin);
+      const requestOrigin = (req.headers.origin as string) || '';
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+      ].filter(Boolean) as string[];
+
+      const matchedOrigin = allowedOrigins.find(o => o === requestOrigin);
+      if (matchedOrigin) {
+        res.setHeader('Access-Control-Allow-Origin', matchedOrigin);
+      } else if (process.env.FRONTEND_URL) {
+        res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
+      } else {
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+      }
       res.setHeader('Access-Control-Allow-Methods', options.methods.join(', ') + ', OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Vary', 'Origin');
 
       // 2. Handle OPTIONS preflight
       if (req.method === 'OPTIONS') {

@@ -2,7 +2,6 @@ import { withMiddleware } from './_lib/middleware';
 import { registrationSchema, paymentSchema } from './_lib/validation';
 import { ApiError } from './_lib/errors';
 import { prisma } from './_lib/prisma';
-import { z } from 'zod';
 
 const fullSchema = registrationSchema.and(paymentSchema);
 

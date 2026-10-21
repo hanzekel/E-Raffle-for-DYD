@@ -7,6 +7,8 @@ export interface ConfigData {
   bankAccountNumber: string;
   bankAccountName: string;
   campNames: string[];
+  drawDate?: string;
+  eligibleEntries?: number;
 }
 
 export interface ApiResponse<T = any> {
@@ -25,6 +27,8 @@ export interface Registration {
   paymentMethod: 'gcash' | 'bank';
   referenceNumber: string;
   proofOfPaymentPath: string;
+  proofOfPaymentUrl?: string;
+  proofOfPaymentSignedUrl?: string;
   status: 'pending' | 'approved' | 'rejected';
   rejectionNote?: string;
   createdAt: string;
@@ -49,6 +53,8 @@ export interface PaymentFormData {
   paymentMethod: 'gcash' | 'bank';
   referenceNumber: string;
   proofOfPaymentPath: string;
+  proofOfPaymentUrl?: string;
+  proofOfPaymentSignedUrl?: string;
 }
 
 export interface AdminDashboardData {
@@ -56,6 +62,41 @@ export interface AdminDashboardData {
   total: number;
   page: number;
   totalPages: number;
+  pendingCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+  eligibleEntries: number;
+}
+
+export interface AdminWinner {
+  id: string;
+  prizeName: string;
+  ticketNumber: string;
+  drawnAt: string;
+  drawnByAdmin: string;
+  verificationHash: string;
+  isVoided: boolean;
+  voidReason?: string;
+  voidedAt?: string;
+  registration: {
+    id: string;
+    fullName: string;
+    email: string;
+    campName: string;
+    referenceNumber: string;
+    paymentMethod: string;
+  };
+}
+
+export interface EligiblePoolTicket {
+  id: string;
+  ticketNumber: string;
+  createdAt: string;
+  registration: {
+    fullName: string;
+    campName: string;
+    status: string;
+  };
 }
 
 export interface PaginatedResponse<T> {

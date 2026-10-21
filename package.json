@@ -4,6 +4,7 @@
   "private": true,
   "description": "MOPCY DYD 2026 Raffle Ticket System — Diocesan Youth Day 2026",
   "scripts": {
+    "dev:all": "node dev-all.js",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev": "vercel dev",
     "build": "prisma generate && npm run build --prefix frontend",
@@ -11,15 +12,17 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
+    "db:check": "prisma db push --skip-generate",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit --project frontend/tsconfig.json"
+    "typecheck": "tsc --noEmit && tsc --noEmit --project frontend/tsconfig.json",
+    "check:all": "npm run typecheck && npm run db:check"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
     "@supabase/supabase-js": "^2.47.0",
     "bcryptjs": "^2.4.3",
-    "cookie": "^1.0.2",
+    "cookie": "^1.1.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.16",
     "pdf-lib": "^1.17.1",

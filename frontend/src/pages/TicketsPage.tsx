@@ -6,10 +6,13 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { StatusBadge } from '../components/StatusBadge';
 
 export const TicketsPage: React.FC = () => {
-  const { orderId } = useParams();
+  const { orderId: paramOrderId } = useParams();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const queryOrderId = searchParams.get('orderId') || searchParams.get('id');
+  const activeOrderId = paramOrderId || queryOrderId || '';
 
+  const [inputOrderId, setInputOrderId] = useState(activeOrderId);
   const [email, setEmail] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,34 +21,36 @@ export const TicketsPage: React.FC = () => {
   const [data, setData] = useState<{ registration: Registration; tickets: Ticket[] } | null>(null);
 
   useEffect(() => {
-    if (token && orderId) {
+    if (token && activeOrderId) {
       setLoading(true);
-      api.get<{ registration: Registration; tickets: Ticket[] }>(`/tickets/${orderId}?token=${token}`)
+      api.get<{ registration: Registration; tickets: Ticket[] }>(`/tickets/${activeOrderId}?token=${token}`)
         .then(res => {
           if (res.success && res.data) {
             setData(res.data);
           } else {
-            setError(res.error || 'Failed to load tickets');
+            const errorMsg = typeof (res.error as any) === 'object' && (res.error as any)?.message ? (res.error as any).message : (res.error || 'Failed to load tickets');
+            setError(errorMsg as string);
           }
         })
         .catch(() => setError('Network error'))
         .finally(() => setLoading(false));
     }
-  }, [token, orderId]);
+  }, [token, activeOrderId]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const res = await api.post('/auth/verify-email', { email, orderId });
+      const res = await api.post('/auth/verify-email', { email, orderId: inputOrderId });
       if (res.success) {
         setVerificationSent(true);
       } else {
-        setError(res.error || 'Verification failed');
+        const errorMsg = typeof (res.error as any) === 'object' && (res.error as any)?.message ? (res.error as any).message : (res.error || 'Verification failed');
+        setError(errorMsg as string);
       }
     } catch {
-      setError('Network error');
+      setError('Network error (Please make sure the backend server is running)');
     } finally {
       setLoading(false);
     }
@@ -53,7 +58,7 @@ export const TicketsPage: React.FC = () => {
 
   if (!token) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-md animate-appear">
+      <div className="container mx-auto px-4 py-6 sm:py-10 max-w-md animate-appear">
         <div className="card text-center relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-radial-gradient from-gold/10 to-transparent opacity-50 blur-3xl pointer-events-none"></div>
           
@@ -66,7 +71,22 @@ export const TicketsPage: React.FC = () => {
             </div>
           ) : (
             <form onSubmit={handleVerify} className="space-y-6 relative z-10 text-left">
-              <p className="text-midnight-navy/60 text-sm mb-4 leading-relaxed">Enter your registered email to receive a secure access link for order <br/><span className="font-mono text-midnight-navy bg-midnight-navy/10 px-2 py-1 rounded mt-2 inline-block border border-midnight-navy/5">{orderId}</span></p>
+              <p className="text-midnight-navy/60 text-sm mb-4 leading-relaxed">Enter your registered email and Order ID to receive a secure access link.</p>
+              
+              {!paramOrderId && (
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-midnight-navy/70">Order ID</label>
+                  <input 
+                    type="text" 
+                    value={inputOrderId} 
+                    onChange={e => setInputOrderId(e.target.value)} 
+                    className="input-field" 
+                    placeholder="Enter your Order ID" 
+                    required 
+                  />
+                </div>
+              )}
+              
               <div>
                 <label className="block text-sm font-medium mb-2 text-midnight-navy/70">Email Address</label>
                 <input 
@@ -96,7 +116,7 @@ export const TicketsPage: React.FC = () => {
   const { registration, tickets } = data;
 
   return (
-    <div className="container mx-auto px-4 py-16 sm:py-24 max-w-4xl animate-appear">
+    <div className="container mx-auto px-4 py-6 sm:py-10 max-w-3xl animate-appear">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-heading font-semibold gradient-text mb-2">Your Tickets</h1>
@@ -105,7 +125,7 @@ export const TicketsPage: React.FC = () => {
         <StatusBadge status={registration.status} />
       </div>
 
-      <div className="card mb-10 bg-midnight-navy/[0.02]">
+      <div className="card mb-6 bg-midnight-navy/[0.02]">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
           <div>
             <p className="text-midnight-navy/40 uppercase tracking-wider mb-1 text-xs font-semibold">Name</p>
@@ -169,3 +189,5 @@ export const TicketsPage: React.FC = () => {
     </div>
   );
 };
+
+

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const PlaceholderLogo: React.FC<{ size?: number; className?: string }> = ({ size = 120, className = '' }) => {
+export const Logo: React.FC<{ size?: number; className?: string }> = ({ size = 120, className = '' }) => {
   return (
     <img 
       src="/logo.png" 

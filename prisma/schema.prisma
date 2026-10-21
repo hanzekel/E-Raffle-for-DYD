@@ -50,6 +50,7 @@ model Ticket {
   qrCodeData     String       @db.Text
   pdfUrl         String
   createdAt      DateTime     @default(now())
+  winner         RaffleWinner?
 
   @@index([registrationId])
   @@index([ticketNumber])
@@ -77,4 +78,21 @@ model RateLimitEntry {
 
   @@index([key])
   @@index([windowStart])
+}
+
+/// Vault model for officially drawn raffle winners with audit hash.
+model RaffleWinner {
+  id               String    @id @default(uuid())
+  ticketId         String    @unique
+  ticket           Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  prizeName        String    @db.VarChar(100)
+  verificationHash String    @unique @db.VarChar(64)
+  drawnAt          DateTime  @default(now())
+  drawnByAdmin     String    @default("admin") @db.VarChar(50)
+  isVoided         Boolean   @default(false)
+  voidReason       String?   @db.Text
+  voidedAt         DateTime?
+
+  @@index([drawnAt])
+  @@index([isVoided])
 }

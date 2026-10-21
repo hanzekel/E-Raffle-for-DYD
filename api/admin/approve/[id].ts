@@ -5,7 +5,7 @@ import { generateAllTickets } from '../../_lib/pdf';
 import { sendApprovalEmail } from '../../_lib/email';
 
 async function handler(req: any, res: any) {
-  const { id } = req.query;
+  const id = req.query.id || req.params?.id || req.query.orderId || req.params?.orderId;
 
   const registration = await prisma.registration.findUnique({
     where: { id },

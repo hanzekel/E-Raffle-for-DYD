@@ -45,3 +45,10 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Agent and Assistant Configurations
+AGENTS.md
+CLAUDE.md
+.agents/
+docs/agents/
+.scratch/

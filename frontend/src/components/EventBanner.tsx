@@ -1,8 +1,8 @@
 import React from 'react';
-import { PlaceholderLogo } from './PlaceholderLogo';
+import { Logo } from './Logo';
 import { Link } from 'react-router-dom';
 
-export const PlaceholderEventBanner: React.FC = () => {
+export const EventBanner: React.FC = () => {
   return (
     <div className="relative w-full overflow-hidden section-divider py-24 md:py-32 flex flex-col items-center justify-center text-center">
       {/* Glow Effect */}
@@ -14,14 +14,14 @@ export const PlaceholderEventBanner: React.FC = () => {
       <div className="relative z-10 flex flex-col items-center px-4 max-w-5xl mx-auto">
         {/* Badge Pill */}
         <div className="animate-appear delay-100 flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full border border-midnight-navy/10 bg-midnight-navy/5 backdrop-blur-md">
-          <span className="text-sm font-medium text-midnight-navy/80">🎟️ DYD 2026 Raffle</span>
+          <span className="text-sm font-medium text-midnight-navy/80">DYD 2026 Raffle</span>
           <span className="text-midnight-navy/30">•</span>
           <Link to="/register" className="text-sm font-medium text-gold hover:text-gold-light transition-colors inline-flex items-center gap-1">
             Register Now <span aria-hidden="true">&rarr;</span>
           </Link>
         </div>
 
-        <PlaceholderLogo size={64} className="mb-6 animate-appear delay-200" />
+        <Logo size={64} className="mb-6 animate-appear delay-200" />
         
         {/* Huge Gradient Headline */}
         <h1 className="animate-appear delay-300 text-4xl sm:text-5xl lg:text-7xl font-heading font-semibold leading-tight text-balance mb-6 gradient-text">

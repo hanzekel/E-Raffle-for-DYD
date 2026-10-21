@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import * as cookie from 'cookie';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
@@ -16,7 +17,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export function generateToken(payload: object): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY as any });
 }
 
 export function verifyToken(token: string): string | jwt.JwtPayload {
@@ -27,16 +28,25 @@ export function getTokenFromCookies(req: VercelRequest): string | null {
   if (req.cookies && req.cookies[TOKEN_COOKIE_NAME]) {
     return req.cookies[TOKEN_COOKIE_NAME];
   }
+  if (req.headers && req.headers.cookie) {
+    try {
+      const parsed = cookie.parse(req.headers.cookie);
+      if (parsed[TOKEN_COOKIE_NAME]) return parsed[TOKEN_COOKIE_NAME];
+    } catch {
+      return null;
+    }
+  }
   return null;
 }
 
 export function setTokenCookie(res: VercelResponse, token: string): void {
   const isProd = process.env.NODE_ENV === 'production';
+  // Use Lax for reliable redirect and navigation across local and prod
   res.setHeader(
     'Set-Cookie',
     `${TOKEN_COOKIE_NAME}=${token}; HttpOnly; Path=/; ${
       isProd ? 'Secure; ' : ''
-    }SameSite=Strict; Max-Age=7200`
+    }SameSite=Lax; Max-Age=7200`
   );
 }
 
@@ -46,6 +56,6 @@ export function clearTokenCookie(res: VercelResponse): void {
     'Set-Cookie',
     `${TOKEN_COOKIE_NAME}=; HttpOnly; Path=/; ${
       isProd ? 'Secure; ' : ''
-    }SameSite=Strict; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+    }SameSite=Lax; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
   );
 }

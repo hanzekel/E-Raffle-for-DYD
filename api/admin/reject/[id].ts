@@ -3,7 +3,7 @@ import { prisma } from '../../_lib/prisma';
 import { ApiError } from '../../_lib/errors';
 
 async function handler(req: any, res: any) {
-  const { id } = req.query;
+  const id = req.query.id || req.params?.id || req.query.orderId || req.params?.orderId;
   const { rejectionNote } = req.body;
 
   const registration = await prisma.registration.findUnique({
@@ -14,9 +14,14 @@ async function handler(req: any, res: any) {
     throw new ApiError(404, 'Registration not found', 'NOT_FOUND');
   }
 
-  if (registration.status !== 'pending') {
-    throw new ApiError(400, `Registration is already ${registration.status}`, 'INVALID_STATUS');
+  if (registration.status === 'rejected') {
+    throw new ApiError(400, 'Registration is already rejected', 'INVALID_STATUS');
   }
+
+  // Remove any tickets if previously approved to deduct from eligible entries
+  await prisma.ticket.deleteMany({
+    where: { registrationId: id },
+  });
 
   await prisma.registration.update({
     where: { id },

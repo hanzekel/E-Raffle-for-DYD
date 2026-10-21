@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useConfig } from '../hooks/useConfig';
 import { registrationSchema, validateField } from '../lib/validation';
 import { sanitizeFormData } from '../lib/sanitize';
@@ -10,12 +10,15 @@ import { api } from '../lib/api';
 export const RegisterPage: React.FC = () => {
   const { config, loading } = useConfig();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefillName = searchParams.get('name') || '';
+  const prefillCamp = searchParams.get('camp') || '';
   
   const [formData, setFormData] = useState<RegistrationFormData>({
-    fullName: '',
+    fullName: prefillName,
     email: '',
     contactNumber: '',
-    campName: '',
+    campName: prefillCamp,
     ticketCount: 1,
   });
   
@@ -23,8 +26,10 @@ export const RegisterPage: React.FC = () => {
   const [customCamp, setCustomCamp] = useState('');
   const [showSummary, setShowSummary] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  if (loading || !config) return <LoadingSpinner message="Loading registration form..." />;
+  // Config is guaranteed via fallback, no freeze
+  if (loading && !config) return <LoadingSpinner message="Loading registration form..." />;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -60,6 +65,7 @@ export const RegisterPage: React.FC = () => {
       return;
     }
 
+    setSubmitError('');
     setIsSubmitting(true);
     try {
       const res = await api.post('/register', sanitized);
@@ -67,10 +73,10 @@ export const RegisterPage: React.FC = () => {
         setFormData(sanitized);
         setShowSummary(true);
       } else {
-        alert(res.error || 'Registration failed');
+        setSubmitError(res.error || 'Registration failed. Please check your inputs.');
       }
     } catch (err) {
-      alert('Network error');
+      setSubmitError('Unable to connect to the server. Please check your internet connection.');
     } finally {
       setIsSubmitting(false);
     }
@@ -85,17 +91,17 @@ export const RegisterPage: React.FC = () => {
   const isOtherCamp = formData.campName !== '' && !config.campNames.includes(formData.campName);
 
   return (
-    <div className="container mx-auto px-4 py-16 sm:py-24 max-w-2xl animate-appear">
-      <div className="text-center mb-10">
+    <div className="container mx-auto px-3 sm:px-4 py-5 sm:py-8 max-w-xl animate-appear">
+      <div className="text-center mb-5 sm:mb-6">
         <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full border border-midnight-navy/10 bg-midnight-navy/5 backdrop-blur-md mx-auto">
           <span className="text-sm font-medium text-midnight-navy/80">Step 1 of 2</span>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-heading font-semibold gradient-text mb-4 text-balance">Raffle Registration</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold gradient-text leading-tight sm:leading-snug mb-1 sm:mb-2 py-1">Raffle Registration</h1>
         <p className="text-midnight-navy/60">Secure your tickets for the DYD 2026</p>
       </div>
       
       <div className="card">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2 text-midnight-navy/70">Full Name</label>
             <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="input-field" placeholder="Juan Dela Cruz" />
@@ -160,6 +166,12 @@ export const RegisterPage: React.FC = () => {
             </div>
           </div>
 
+          {submitError && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs sm:text-sm text-center animate-appear">
+              {submitError}
+            </div>
+          )}
+
           <button type="submit" className="w-full btn-primary text-lg mt-4" disabled={isSubmitting}>
             {isSubmitting ? 'Validating...' : 'Review Registration'}
           </button>
@@ -204,3 +216,4 @@ export const RegisterPage: React.FC = () => {
     </div>
   );
 };
+

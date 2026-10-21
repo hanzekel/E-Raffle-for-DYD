@@ -30,12 +30,16 @@ async function handler(req: any, res: any) {
   const token = generateToken({ username, role: 'admin' });
   const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2h
 
-  await prisma.adminSession.create({
-    data: {
-      token,
-      expiresAt,
-    },
-  });
+  try {
+    await prisma.adminSession.create({
+      data: {
+        token,
+        expiresAt,
+      },
+    });
+  } catch (err) {
+    console.warn('Admin session database persistence unavailable, continuing with signed JWT session.');
+  }
 
   setTokenCookie(res, token);
 
