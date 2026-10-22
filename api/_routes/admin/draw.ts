@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { z } from 'zod';
-import { withMiddleware } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
-import { ApiError } from '../_lib/errors';
+import { withMiddleware } from '../../_lib/middleware';
+import { prisma } from '../../_lib/prisma';
+import { ApiError } from '../../_lib/errors';
 
 const drawSchema = z.object({
   prizeName: z.string().min(1, 'Prize name is required').max(100),

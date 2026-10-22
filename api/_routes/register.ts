@@ -1,6 +1,6 @@
-import { withMiddleware } from './_lib/middleware';
-import { registrationSchema } from './_lib/validation';
-import { ApiError } from './_lib/errors';
+import { withMiddleware } from '../_lib/middleware';
+import { registrationSchema } from '../_lib/validation';
+import { ApiError } from '../_lib/errors';
 
 async function handler(req: any, res: any) {
   const result = registrationSchema.safeParse(req.body);

@@ -1,6 +1,6 @@
 // Role and authentication verification endpoint
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getTokenFromCookies, verifyToken } from '../_lib/auth';
+import { getTokenFromCookies, verifyToken } from '../../_lib/auth';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS setup for local and production

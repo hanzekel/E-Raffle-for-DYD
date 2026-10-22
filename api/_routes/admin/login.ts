@@ -1,8 +1,8 @@
-import { withMiddleware } from '../_lib/middleware';
-import { adminLoginSchema } from '../_lib/validation';
-import { ApiError } from '../_lib/errors';
-import { verifyPassword, generateToken, setTokenCookie } from '../_lib/auth';
-import { prisma } from '../_lib/prisma';
+import { withMiddleware } from '../../_lib/middleware';
+import { adminLoginSchema } from '../../_lib/validation';
+import { ApiError } from '../../_lib/errors';
+import { verifyPassword, generateToken, setTokenCookie } from '../../_lib/auth';
+import { prisma } from '../../_lib/prisma';
 
 async function handler(req: any, res: any) {
   const result = adminLoginSchema.safeParse(req.body);

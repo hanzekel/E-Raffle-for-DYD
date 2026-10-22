@@ -1,7 +1,7 @@
 // Global public configuration with live eligible entries count
-import { withMiddleware } from './_lib/middleware';
-import { CAMP_NAMES } from './_lib/validation';
-import { prisma } from './_lib/prisma';
+import { withMiddleware } from '../_lib/middleware';
+import { CAMP_NAMES } from '../_lib/validation';
+import { prisma } from '../_lib/prisma';
 
 async function handler(_req: any, res: any) {
   let eligibleEntries = 0;

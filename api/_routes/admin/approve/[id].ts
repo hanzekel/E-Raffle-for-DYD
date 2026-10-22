@@ -1,8 +1,8 @@
-import { withMiddleware } from '../../_lib/middleware';
-import { prisma } from '../../_lib/prisma';
-import { ApiError } from '../../_lib/errors';
-import { generateAllTickets } from '../../_lib/pdf';
-import { sendApprovalEmail } from '../../_lib/email';
+import { withMiddleware } from '../../../_lib/middleware';
+import { prisma } from '../../../_lib/prisma';
+import { ApiError } from '../../../_lib/errors';
+import { generateAllTickets } from '../../../_lib/pdf';
+import { sendApprovalEmail } from '../../../_lib/email';
 
 async function handler(req: any, res: any) {
   const id = req.query.id || req.params?.id || req.query.orderId || req.params?.orderId;

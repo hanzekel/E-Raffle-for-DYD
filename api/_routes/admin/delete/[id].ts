@@ -1,7 +1,7 @@
 // Admin endpoint to permanently delete a registration and all associated database records
-import { withMiddleware } from '../../_lib/middleware';
-import { prisma } from '../../_lib/prisma';
-import { ApiError } from '../../_lib/errors';
+import { withMiddleware } from '../../../_lib/middleware';
+import { prisma } from '../../../_lib/prisma';
+import { ApiError } from '../../../_lib/errors';
 
 async function handler(req: any, res: any) {
   const id = req.query.id || req.params?.id || req.query.orderId || req.params?.orderId;

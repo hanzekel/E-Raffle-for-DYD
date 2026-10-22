@@ -1,5 +1,5 @@
-import { withMiddleware } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
+import { withMiddleware } from '../../_lib/middleware';
+import { prisma } from '../../_lib/prisma';
 
 function maskParticipantName(fullName: string): string {
   if (!fullName) return 'Participant';
