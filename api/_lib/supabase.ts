@@ -67,6 +67,11 @@ export function validateFileMetadata(contentType: string, sizeBytes: number): vo
     throw new ApiError(400, 'Invalid file type. Only JPEG, PNG, and WEBP are allowed.', 'INVALID_FILE_TYPE');
   }
 
+  const MIN_SIZE = 12 * 1024; // 12KB minimum to reject empty/trivial files
+  if (sizeBytes < MIN_SIZE) {
+    throw new ApiError(400, 'File is too small to be a readable transaction receipt screenshot (minimum 12KB).', 'FILE_TOO_SMALL');
+  }
+
   const MAX_SIZE = 5 * 1024 * 1024; // 5MB
   if (sizeBytes > MAX_SIZE) {
     throw new ApiError(400, 'File size exceeds the 5MB limit.', 'FILE_TOO_LARGE');
