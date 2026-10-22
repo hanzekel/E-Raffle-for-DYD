@@ -1,6 +1,6 @@
-import { withMiddleware } from '../_lib/middleware';
-import { clearTokenCookie, getTokenFromCookies } from '../_lib/auth';
-import { prisma } from '../_lib/prisma';
+import { withMiddleware } from '../../_lib/middleware';
+import { clearTokenCookie, getTokenFromCookies } from '../../_lib/auth';
+import { prisma } from '../../_lib/prisma';
 
 async function handler(req: any, res: any) {
   const token = getTokenFromCookies(req);

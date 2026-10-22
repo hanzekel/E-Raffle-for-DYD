@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { withMiddleware } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
-import { ApiError } from '../_lib/errors';
+import { withMiddleware } from '../../_lib/middleware';
+import { prisma } from '../../_lib/prisma';
+import { ApiError } from '../../_lib/errors';
 
 const voidSchema = z.object({
   winnerId: z.string().min(1, 'Winner ID is required'),

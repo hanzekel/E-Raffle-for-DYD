@@ -1,6 +1,6 @@
-import { withMiddleware } from './_lib/middleware';
-import { validateFileMetadata, createSignedUploadUrl } from './_lib/supabase';
-import { ApiError } from './_lib/errors';
+import { withMiddleware } from '../_lib/middleware';
+import { validateFileMetadata, createSignedUploadUrl } from '../_lib/supabase';
+import { ApiError } from '../_lib/errors';
 import crypto from 'crypto';
 
 async function handler(req: any, res: any) {

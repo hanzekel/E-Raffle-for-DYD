@@ -1,8 +1,8 @@
-import { withMiddleware } from '../_lib/middleware';
-import { ApiError } from '../_lib/errors';
-import { prisma } from '../_lib/prisma';
-import { generateToken } from '../_lib/auth';
-import { sendVerificationEmail } from '../_lib/email';
+import { withMiddleware } from '../../_lib/middleware';
+import { ApiError } from '../../_lib/errors';
+import { prisma } from '../../_lib/prisma';
+import { generateToken } from '../../_lib/auth';
+import { sendVerificationEmail } from '../../_lib/email';
 import { z } from 'zod';
 
 const requestSchema = z.object({

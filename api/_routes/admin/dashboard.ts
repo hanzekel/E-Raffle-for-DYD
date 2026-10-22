@@ -1,7 +1,7 @@
 // Admin dashboard data retrieval with registration and entry metrics
-import { withMiddleware } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
-import { getSignedUrl } from '../_lib/supabase';
+import { withMiddleware } from '../../_lib/middleware';
+import { prisma } from '../../_lib/prisma';
+import { getSignedUrl } from '../../_lib/supabase';
 
 async function handler(req: any, res: any) {
   const status = req.query.status as string;

@@ -1,6 +1,6 @@
 // Admin endpoint for full audit ledger of raffle winners
-import { withMiddleware } from '../_lib/middleware';
-import { prisma } from '../_lib/prisma';
+import { withMiddleware } from '../../_lib/middleware';
+import { prisma } from '../../_lib/prisma';
 
 async function handler(_req: any, res: any) {
   try {

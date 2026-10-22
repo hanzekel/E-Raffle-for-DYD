@@ -1,8 +1,8 @@
-import { withMiddleware } from '../_lib/middleware';
-import { verifyToken } from '../_lib/auth';
-import { ApiError } from '../_lib/errors';
-import { prisma } from '../_lib/prisma';
-import { getSignedUrl } from '../_lib/supabase';
+import { withMiddleware } from '../../_lib/middleware';
+import { verifyToken } from '../../_lib/auth';
+import { ApiError } from '../../_lib/errors';
+import { prisma } from '../../_lib/prisma';
+import { getSignedUrl } from '../../_lib/supabase';
 
 async function handler(req: any, res: any) {
   const orderId = req.query.orderId || req.params?.orderId || req.query.id || req.params?.id;
