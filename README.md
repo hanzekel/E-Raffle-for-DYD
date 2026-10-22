@@ -1,113 +1,114 @@
-# 🎟️ MOPCY DYD 2026 — Diocesan Youth Day Raffle Platform
+# MOPCY DYD 2026 - Diocesan Youth Day Raffle Platform
 
-> **Diocesan Youth Day 2026**  
-> *"Take Courage, Youth in Christ: 40 Years in Mission"*  
-> General Headquarters (GHQ), Philippines
+Diocesan Youth Day 2026
+"Take Courage, Youth in Christ: 40 Years in Mission"
+General Headquarters (GHQ), Philippines
 
-A secure, full-stack raffle ticket web application and live draw stage built for MOPCY DYD 2026. Attendees register, submit GCash/bank transfer payment proofs, and receive cryptographically verified PDF e-tickets with QR codes upon admin verification.
-
----
-
-## 🚀 Key Features
-
-### 🌐 Public Experience
-- **High-Impact Hero & Fit-to-Screen Design:** Styled with the Diocesan Marian Blue color palette (`#1A3A8F`), Marian gold accents (`#F5A623`), and responsive typography optimized for mobile (375px+) and desktop displays.
-- **Streamlined Multi-Step Registration:** Fast registration flow with quantity selection, instant price calculation, and real-time validation.
-- **Secure Proof Upload:** Direct image uploads for GCash or bank transfer slips stored securely in Supabase Storage with signed URL access.
-- **E-Ticket Retrieval:** Attendees can verify and download their custom-generated PDF tickets with high-resolution QR codes.
-- **Live CSPRNG Raffle Stage (`/raffle`):** Public-facing animated stage for live event draws featuring real-time drum rolls, cryptographic randomness, and instant winner reveal.
-
-### 🛡️ Admin & Operational Controls
-- **Real-Time Live Dashboard:** Auto-syncing statistics (Total Submissions, Pending, Eligible, Rejected, Confirmed Winners) polling seamlessly every 6 seconds without UI flicker.
-- **In-App Receipt Viewer:** Instant high-resolution preview modal for proof-of-payment receipts with quick-action full-size inspection.
-- **One-Click Approval / Rejection:** Automated PDF ticket generation and transactional email dispatch upon approval.
-- **Cascading Permanent Deletion:** Safe, reason-free entry deletion with in-app dual confirmation that purges registration records and associated tickets from PostgreSQL.
-- **Live Draw Controls & Void/Redraw:** Secure CSPRNG draw engine with tamper-evident SHA-256 draw verification and operator Void & Redraw capabilities.
-- **Zero Native Popups:** 100% custom accessible UI dialogs (`actionModal`, `noticeModal`) eliminating native browser `alert()` and `confirm()` dialogs.
-- **Audit & CSV Export:** One-click CSV export of approved raffle entries and winners with cryptographic hashes.
+A full-stack raffle ticket web application and live draw stage built for MOPCY DYD 2026. Attendees register, submit payment proofs, and receive cryptographically verified PDF e-tickets with QR codes upon admin verification.
 
 ---
 
-## 🛠️ Tech Stack
+## Core Features
+
+### Public Experience
+- Hero and Fit-to-Screen Design: Styled with the Diocesan Marian Blue color palette (#1A3A8F), gold accents (#F5A623), and typography scaled for both mobile phones and large displays.
+- Registration Flow: Multi-step registration form with live price calculations and input sanitization.
+- Smart Receipt Validator: Client-side canvas analyzer that inspects uploaded proofs. Rejects blank canvases, solid-color squares, low-resolution files, or non-receipt photos using luminance variance and Sobel edge-contrast algorithms before upload.
+- E-Ticket Retrieval: Attendees can verify their email to download generated PDF tickets containing QR codes.
+- 3D Flying Tickets Live Raffle Stage (/raffle): Stage view powered by an HTML5 canvas 3D physics engine. Eligible tickets tumble, pitch, and roll in a swirling wind vortex before extracting a golden winning ticket with built-in audio effects and celebratory confetti.
+
+### Admin and Operational Controls
+- Live Sync Dashboard: Metrics update automatically in the background every 6 seconds without page flickers.
+- In-App Receipt Lightbox: Preview uploaded payment slips directly in the browser with a one-click shortcut to inspect full-resolution files.
+- Cascading Record Deletion: Direct, reason-free entry deletion with an in-app confirmation modal that purges the registration, associated tickets, and winner records from the database.
+- Audit Ledger and CSV Export: Filter, review, and export approved participants and drawn winners alongside their SHA-256 verification hashes.
+- Accessible Modals: Zero native browser alert or confirm popups; all user prompts use custom dialogs.
+
+---
+
+## Technical Stack
 
 | Layer | Technology |
 | :--- | :--- |
-| **Frontend** | React 19 · TypeScript · Tailwind CSS 3 · Vite · Lucide Icons |
-| **Backend** | Vercel Serverless Functions / Express (`local-server.ts` for local dev) |
-| **Database** | PostgreSQL (Supabase) via Prisma 6 ORM |
-| **Storage** | Supabase Storage (private bucket with short-lived signed URLs) |
-| **PDF & QR** | `pdf-lib` (custom e-ticket generation) · `qrcode` |
-| **Email** | Nodemailer (SMTP transactional dispatch) |
-| **Security** | Node.js `crypto` CSPRNG · JWT (HTTP-only) · bcryptjs (12 rounds) · Zod |
-| **Deployment** | Vercel (Production) |
+| Frontend | React 19, TypeScript, Tailwind CSS 3, Vite, SVG Icons |
+| Backend API | Node.js Express dispatcher deployed as a single Vercel Serverless Function |
+| Database | PostgreSQL (Supabase) accessed via Prisma 6 ORM |
+| Storage | Supabase Storage (private bucket with short-lived signed URLs) |
+| Ticket Generation | pdf-lib, qrcode |
+| Email Service | Nodemailer (SMTP transactional mailer) |
+| Cryptography | Node.js crypto CSPRNG, Web Crypto API, JWT (HTTP-only cookies), bcryptjs |
+| Deployment | Vercel (Production) |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 DYDWebsite/
-├── api/                          # Vercel Serverless Functions & API Endpoints
+├── api/
+│   ├── index.ts                  # Single serverless entrypoint for Vercel
 │   ├── _lib/                     # Shared backend utilities
-│   │   ├── auth.ts               # JWT authentication & bcrypt helpers
-│   │   ├── email.ts              # Nodemailer transactional emailer
-│   │   ├── errors.ts             # Standardized API error handler
-│   │   ├── middleware.ts         # CORS & route guards
-│   │   ├── pdf.ts                # PDF e-ticket generator with QR embedding
+│   │   ├── auth.ts               # JWT authentication and bcrypt password helpers
+│   │   ├── email.ts              # Nodemailer transport configuration
+│   │   ├── errors.ts             # Standardized API error responses
+│   │   ├── middleware.ts         # CORS guards and rate limiting
+│   │   ├── pdf.ts                # PDF e-ticket layout and QR embedding
 │   │   ├── prisma.ts             # Prisma client singleton
-│   │   ├── supabase.ts           # Supabase client wrapper
-│   │   └── validation.ts         # Zod schemas for request validation
-│   ├── admin/
-│   │   ├── approve/[id].ts       # POST: Approve registration & generate tickets
-│   │   ├── reject/[id].ts        # POST: Reject registration with reason
-│   │   ├── delete/[id].ts        # DELETE: Permanent cascading deletion
-│   │   ├── dashboard.ts          # GET: Real-time dashboard metrics & entries
-│   │   ├── draw.ts               # POST: CSPRNG ticket draw execution
-│   │   ├── void-draw.ts          # POST: Void draw & return ticket to pool
-│   │   ├── winners.ts            # GET: Confirmed raffle winners list
-│   │   ├── login.ts              # POST: Admin authentication
-│   │   └── me.ts                 # GET: Admin session validation
-│   ├── tickets/
-│   │   ├── [orderId].ts          # GET: Order ticket details
-│   │   └── all.ts                # GET: Public ticket roster
-│   ├── raffle/
-│   │   ├── winners.ts            # GET: Public winners feed
-│   │   └── pool.ts               # GET: Public eligible entries pool
-│   ├── config.ts                 # GET: Dynamic event configurations
-│   ├── payment.ts                # POST: Proof of payment upload handler
-│   └── register.ts               # POST: Initial attendee registration
-├── frontend/                     # React + Vite Single Page Application
+│   │   ├── supabase.ts           # Supabase client wrapper and file size guards
+│   │   └── validation.ts         # Zod schemas for input validation
+│   └── _routes/                  # Internal API route handlers
+│       ├── config.ts             # GET /api/config
+│       ├── payment.ts            # POST /api/payment
+│       ├── register.ts           # POST /api/register
+│       ├── upload-url.ts         # POST /api/upload-url
+│       ├── admin/                # Admin endpoints (login, dashboard, draw, delete)
+│       ├── auth/                 # Email verification endpoint
+│       ├── raffle/               # Public winners feed
+│       └── tickets/              # Public tickets roster and order downloads
+├── frontend/
 │   ├── src/
-│   │   ├── components/           # UI components (SiteBackground, EventBanner, etc.)
+│   │   ├── components/           # UI components (FlyingTicketsVortex, WinningTicketCard, etc.)
 │   │   ├── hooks/                # Custom React hooks (useAuth, useConfig)
-│   │   ├── lib/                  # Frontend API client and utilities
-│   │   ├── pages/                # Page views (Landing, Register, Admin, Raffle, etc.)
-│   │   └── types/                # TypeScript interfaces and contracts
+│   │   ├── lib/                  # API client, audio synthesizer, receipt validator
+│   │   ├── pages/                # Page views (Landing, Register, Admin, Raffle, Payment)
+│   │   └── types/                # TypeScript shared interfaces
 │   ├── index.html
 │   ├── tailwind.config.js
 │   └── vite.config.js
 ├── prisma/
 │   └── schema.prisma             # PostgreSQL schema definition
-├── local-server.ts               # Local Express dev server mounting all API routes
-├── dev-all.js                    # Concurrent dev runner (API + Vite frontend)
+├── local-server.ts               # Local Express server mounting api/index.ts
+├── dev-all.js                    # Concurrent development runner (API + Vite)
 ├── vercel.json                   # Vercel deployment and routing configuration
 └── .env.example                  # Environment configuration template
 ```
 
 ---
 
-## 💻 Local Development Setup
+## Vercel Serverless Architecture
 
-### 1. Prerequisites
-- **Node.js** ≥ 20.x
-- **npm** ≥ 10.x
-- **Supabase** project (PostgreSQL + private Storage bucket)
+To stay within the 12-function limit of Vercel's free Hobby plan, this application consolidates all 18 backend endpoints into a single Express serverless function (`api/index.ts`).
 
-### 2. Installation
+1. Route files reside in `api/_routes/`. Folders prefixed with an underscore are ignored by Vercel's function scanner.
+2. `api/index.ts` mounts all routes through an Express router and handles incoming traffic.
+3. `vercel.json` rewrites all `/api/(.*)` requests to `/api`.
+
+This guarantees the entire backend uses only 1 serverless function on Vercel while keeping local development (`local-server.ts`) running the exact same router code.
+
+---
+
+## Local Development Setup
+
+### Prerequisites
+- Node.js version 20 or higher
+- npm version 10 or higher
+- Supabase project (PostgreSQL database and private Storage bucket)
+
+### 1. Installation
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd DYDWebsite
+git clone https://github.com/hanzekel/E-Raffle-for-DYD.git
+cd E-Raffle-for-DYD
 
 # Install root dependencies
 npm install
@@ -116,60 +117,70 @@ npm install
 npm install --prefix frontend
 ```
 
-### 3. Environment Configuration
-Copy the template and configure your secrets:
+### 2. Environment Configuration
+Copy the sample environment file and add your credentials:
 ```bash
 cp .env.example .env
 ```
-Ensure the following variables are set in `.env`:
-- `DATABASE_URL` / `DIRECT_URL`: Supabase PostgreSQL connection strings
-- `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`: Supabase API credentials
-- `SUPABASE_STORAGE_BUCKET`: `dyd26-uploads`
-- `JWT_SECRET`: Random 64-character secret
-- `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH`: Admin credentials (bcrypt 12 rounds)
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`: Mail server credentials
 
-### 4. Database Parity
-Synchronize your database schema with Supabase:
+Key environment variables:
+- `DATABASE_URL`: Supabase connection pooler URL (with `?pgbouncer=true`)
+- `DIRECT_URL`: Supabase direct connection URL (port 5432)
+- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`: Supabase API credentials
+- `SUPABASE_STORAGE_BUCKET`: Private bucket name (e.g. `dyd26-uploads`)
+- `JWT_SECRET`: Random 64-character secret
+- `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH`: Admin credentials
+- `GCASH_NUMBER`, `GCASH_NAME`, `BANK_NAME`, `BANK_ACCOUNT_NUMBER`: Payment info displayed to users
+
+### 3. Database Parity
+Sync the database schema with Supabase:
 ```bash
 # Generate Prisma client
 npx prisma generate
 
-# Verify or sync schema with the database
+# Verify database schema parity
 npm run db:check
 ```
 
-### 5. Running the Application
-Launch both the backend API server and frontend SPA concurrently:
+### 4. Running Locally
+Start both the Express API server and the Vite frontend simultaneously:
 ```bash
 npm run dev:all
 ```
-- **Frontend:** `http://localhost:5173`
-- **Backend API:** `http://localhost:3000/api/*`
-- **Live Raffle Stage:** `http://localhost:5173/raffle`
-- **Admin Dashboard:** `http://localhost:5173/admin/dashboard`
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3000/api/*
+- Live Raffle Stage: http://localhost:5173/raffle
+- Admin Dashboard: http://localhost:5173/admin/dashboard
 
 ---
 
-## 🧪 Quality Assurance & Type Checking
+## Testing and Verification
 
 Run full TypeScript compilation across both frontend and backend along with database schema validation:
 ```bash
 npm run check:all
 ```
 
----
-
-## 🔒 Security Architecture
-
-- **CSPRNG Execution:** Draws use Node.js `crypto.randomInt` and Web Crypto API to ensure uniform distribution and prevent predictability.
-- **Tamper-Evident Hashing:** Each draw generates a SHA-256 integrity hash linking the winner, ticket ID, timestamp, and seed.
-- **Signed URL Protection:** All proof-of-payment receipts are stored in a private Supabase bucket and accessed only via short-lived signed URLs.
-- **Strict Role-Based Guards:** Admin endpoints are shielded behind JWT tokens stored in HTTP-only cookies with 12-round bcrypt verification.
-- **Sanitized Inputs:** Strict Zod parsing on API request payloads prevents parameter injection and unexpected inputs.
+To test the production build locally:
+```bash
+npm run build
+```
 
 ---
 
-## 📄 License
+## Vercel Deployment Guide
+
+1. Push your repository to GitHub.
+2. Go to vercel.com/new and import your repository.
+3. In Project Settings:
+   - Root Directory: `./` (do not select the `frontend` subfolder).
+   - Application Preset: `Other` (so `vercel.json` handles build commands).
+4. Under Environment Variables, paste the contents of your `.env` file.
+5. Click Deploy.
+6. Once deployed, update `FRONTEND_URL` in your Vercel Project Settings to match your production domain.
+
+---
+
+## License
 
 Diocesan Youth Day 2026 (MOPCY). All rights reserved.
