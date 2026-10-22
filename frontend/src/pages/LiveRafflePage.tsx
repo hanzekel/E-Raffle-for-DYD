@@ -1,11 +1,13 @@
 // Live stage raffle draw with audience spectator mode, realtime entry pool, and stage controls
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { LockIcon, ShieldIcon, DiceIcon, TrophyIcon, TicketIcon, ExpandIcon, CompressIcon } from '../components/icons/Icons';
+import { LockIcon, ShieldIcon, DiceIcon, TicketIcon, ExpandIcon, CompressIcon } from '../components/icons/Icons';
 import { EligiblePoolTicket } from '../types';
+import { FlyingTicketsVortex } from '../components/FlyingTicketsVortex';
+import { WinningTicketCard } from '../components/WinningTicketCard';
 
 const PRESET_PRIZES = [
   'Grand Prize: Brand New Scooter + ₱20,000',
@@ -24,7 +26,6 @@ export const LiveRafflePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isShuffling, setIsShuffling] = useState(false);
   const [winner, setWinner] = useState<any | null>(null);
-  const [displayIndex, setDisplayIndex] = useState<number>(0);
   const [selectedPrize, setSelectedPrize] = useState<string>(PRESET_PRIZES[0]);
   const [customPrize, setCustomPrize] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -34,8 +35,6 @@ export const LiveRafflePage: React.FC = () => {
   const [stageVoidReason, setStageVoidReason] = useState('');
   const [stageVoidError, setStageVoidError] = useState('');
   const [isStageVoiding, setIsStageVoiding] = useState(false);
-
-  const shuffleIntervalRef = useRef<number | null>(null);
 
   const fetchTickets = async () => {
     try {
@@ -105,13 +104,6 @@ export const LiveRafflePage: React.FC = () => {
     setIsShuffling(true);
     setWinner(null);
 
-    // Rapid visual drum shuffle for stage excitement (cycling both ticket and name)
-    if (tickets.length > 0) {
-      shuffleIntervalRef.current = window.setInterval(() => {
-        setDisplayIndex(Math.floor(Math.random() * tickets.length));
-      }, 50);
-    }
-
     try {
       // Trigger server CSPRNG draw in backend vault
       const drawPromise = api.post<any>('/admin/draw', { prizeName: prize });
@@ -121,8 +113,6 @@ export const LiveRafflePage: React.FC = () => {
       
       const [res] = await Promise.all([drawPromise, delayPromise]);
 
-      if (shuffleIntervalRef.current) clearInterval(shuffleIntervalRef.current);
-
       if (res.success && res.data) {
         setWinner(res.data);
         fetchTickets(); // Refresh remaining tickets in pool
@@ -130,7 +120,6 @@ export const LiveRafflePage: React.FC = () => {
         throw new Error((res.error as any)?.message || res.error || 'Failed to complete server draw');
       }
     } catch (err: any) {
-      if (shuffleIntervalRef.current) clearInterval(shuffleIntervalRef.current);
       setErrorMsg(err.message || 'Error occurred during draw');
     } finally {
       setIsShuffling(false);
@@ -178,9 +167,6 @@ export const LiveRafflePage: React.FC = () => {
 
   // Whether active draw controls are displayed
   const isOperatorActive = isAdmin && !previewAsPublic;
-
-  // Active shuffling item
-  const shufflingItem = tickets.length > 0 ? tickets[displayIndex] : null;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-3 sm:p-5 md:p-6 relative overflow-hidden pb-12">
@@ -343,103 +329,39 @@ export const LiveRafflePage: React.FC = () => {
         </div>
       )}
 
-      {/* The 3D Raffle Drum */}
-      <div className="relative z-10 flex flex-col items-center mb-4 sm:mb-6">
-        <div className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center overflow-hidden shadow-2xl transition-all duration-500 bg-midnight-navy/90 border-4 sm:border-6 border-gold/40 backdrop-blur-xl">
-          {/* Inner rotating flush effect */}
-          {isShuffling && (
-            <div
-              className="absolute inset-0 bg-gradient-to-tr from-gold/30 via-transparent to-gold/50 animate-spin"
-              style={{ animationDuration: '0.25s' }}
-            />
-          )}
+      {/* 3D Flying Tickets Raffle Chamber */}
+      <div className="relative z-10 w-full max-w-2xl flex flex-col items-center mb-6">
+        <FlyingTicketsVortex
+          tickets={tickets}
+          isShuffling={isShuffling}
+          winner={winner}
+          className="w-full"
+        />
 
-          {/* Ticket Information inside Drum */}
-          <div className={`relative z-10 text-center p-3 sm:p-6 ${isShuffling ? 'scale-110 opacity-90 blur-[0.3px]' : 'scale-100'} transition-all`}>
-            {winner ? (
-              // Winner revealed state
-              <>
-                <div className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 animate-bounce bg-gold text-midnight-navy p-2 sm:p-3 rounded-full shadow-lg border-2 border-white">
-                  <TrophyIcon size={22} className="sm:w-7 sm:h-7" />
-                </div>
-
-                <div className="font-mono text-lg sm:text-3xl md:text-4xl font-black text-gold mb-1 sm:mb-2 tracking-wider animate-appear">
-                  {winner.ticketNumber}
-                </div>
-                <div className="text-sm sm:text-xl md:text-2xl font-bold text-white mb-0.5 sm:mb-1 truncate max-w-[180px] sm:max-w-xs mx-auto animate-appear">
-                  {winner.registration?.fullName || '---'}
-                </div>
-                <div className="text-[11px] sm:text-sm font-semibold text-sky-blue/90 truncate max-w-[180px] sm:max-w-xs mx-auto animate-appear">
-                  {winner.registration?.campName || '---'}
-                </div>
-
-                <div className="mt-2 sm:mt-3 inline-block bg-gold text-midnight-navy font-black text-[10px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider animate-appear shadow-md">
-                  {winner.prizeName}
-                </div>
-              </>
-            ) : isShuffling ? (
-              // Live shuffling state: both ticket number AND name shuffle rapidly together in real-time
-              <>
-                <div className="font-mono text-lg sm:text-3xl md:text-4xl font-black text-gold mb-1 sm:mb-2 tracking-wider">
-                  {shufflingItem?.ticketNumber || 'SHUFFLING...'}
-                </div>
-                <div className="text-sm sm:text-xl md:text-2xl font-bold text-white mb-0.5 sm:mb-1 truncate max-w-[180px] sm:max-w-xs mx-auto">
-                  {shufflingItem?.registration?.fullName || '---'}
-                </div>
-                <div className="text-[11px] sm:text-sm font-semibold text-sky-blue/90 truncate max-w-[180px] sm:max-w-xs mx-auto">
-                  {shufflingItem?.registration?.campName || '---'}
-                </div>
-                <div className="mt-2 sm:mt-3 inline-block bg-white/20 text-white font-bold text-[10px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider">
-                  Shuffling Live...
-                </div>
-              </>
-            ) : (
-              // Idle state: no person's name, clean neutral placeholder
-              <>
-                <div className="font-mono text-lg sm:text-3xl md:text-4xl font-black text-gold mb-1 sm:mb-2 tracking-wider">
-                  DYD26 RAFFLE
-                </div>
-                <div className="text-sm sm:text-xl md:text-2xl font-bold text-white mb-0.5 sm:mb-1">
-                  Ready to Draw
-                </div>
-                <div className="text-[11px] sm:text-sm font-semibold text-sky-blue/90">
-                  {tickets.length} Approved Entries in Pool
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Winner Ring Pulse */}
-          {winner && (
-            <div className="absolute inset-0 border-8 border-gold rounded-full animate-ping opacity-30" />
-          )}
-        </div>
-
-        {/* Verification Hash Badge below Drum */}
+        {/* Drawn Golden Ticket Presentation */}
         {winner && (
-          <div className="mt-4 max-w-md w-full bg-white/80 backdrop-blur border border-slate-200 p-3 rounded-xl shadow-sm text-center animate-appear">
-            <span className="text-[10px] text-slate-500 uppercase font-medium block">
-              Official Verification Code
-            </span>
-            <span className="font-mono text-[11px] text-royal-blue font-bold break-all select-all">
-              {winner.verificationHash}
-            </span>
-          </div>
-        )}
-
-        {/* Operator Void & Redraw Action in Standard View */}
-        {isOperatorActive && winner && (
-          <div className="mt-3 flex items-center justify-center gap-2 animate-appear">
-            <button
-              onClick={() => {
+          <div className="w-full mt-4 animate-appear space-y-3">
+            <WinningTicketCard
+              winner={winner}
+              isOperator={isOperatorActive}
+              onVoidRequest={() => {
                 setStageVoidOpen(true);
                 setStageVoidReason('');
                 setStageVoidError('');
               }}
-              className="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-sm active:scale-95"
-            >
-              <span>Void &amp; Redraw Winner</span>
-            </button>
+            />
+
+            {/* Stage Operator Quick Next Action */}
+            {isOperatorActive && (
+              <div className="flex justify-center gap-3 pt-1">
+                <button
+                  onClick={() => setWinner(null)}
+                  className="px-4 py-2 rounded-xl bg-royal-blue hover:bg-royal-blue-dark text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                >
+                  <span>Draw Next Prize &rarr;</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -566,90 +488,31 @@ export const LiveRafflePage: React.FC = () => {
             </button>
           </div>
 
-          {/* Center Stage Presentation: Giant Drum */}
-          <div className="flex-1 flex flex-col items-center justify-center my-4 sm:my-8 relative z-10">
+          {/* Center Stage Presentation: 3D Flying Tickets Chamber */}
+          <div className="flex-1 flex flex-col items-center justify-center my-2 sm:my-4 relative z-10 w-full max-w-4xl mx-auto">
             {/* Background Stage Glow */}
             <div className="absolute w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] bg-royal-blue/20 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="relative w-72 h-72 sm:w-[440px] sm:h-[440px] md:w-[540px] md:h-[540px] rounded-full flex items-center justify-center overflow-hidden shadow-[0_0_80px_rgba(245,166,35,0.25)] transition-all duration-500 bg-[#06102D] border-4 sm:border-8 border-gold/60 backdrop-blur-2xl">
-              {/* Inner fast spin effect when shuffling */}
-              {isShuffling && (
-                <div
-                  className="absolute inset-0 bg-gradient-to-tr from-gold/40 via-transparent to-gold/60 animate-spin"
-                  style={{ animationDuration: '0.2s' }}
-                />
-              )}
+            {/* 3D Flying Chamber */}
+            <FlyingTicketsVortex
+              tickets={tickets}
+              isShuffling={isShuffling}
+              winner={winner}
+              className="w-full max-w-3xl"
+            />
 
-              {/* Centered Ticket / Winner Display */}
-              <div className={`relative z-10 text-center p-4 sm:p-8 ${isShuffling ? 'scale-110 opacity-95' : 'scale-100'} transition-all max-w-[90%]`}>
-                {winner ? (
-                  <>
-                    <div className="mx-auto mb-3 sm:mb-5 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gold text-midnight-navy flex items-center justify-center shadow-[0_0_25px_#f5a623] border-2 border-white animate-bounce">
-                      <TrophyIcon size={28} className="sm:w-9 sm:h-9" />
-                    </div>
-
-                    <div className="font-mono text-2xl sm:text-4xl md:text-5xl font-black text-gold mb-1 sm:mb-2 tracking-wider animate-appear drop-shadow-[0_2px_10px_rgba(245,166,35,0.4)]">
-                      {winner.ticketNumber}
-                    </div>
-                    <div className="text-xl sm:text-3xl md:text-4xl font-extrabold text-white mb-1 truncate animate-appear">
-                      {winner.registration?.fullName || '---'}
-                    </div>
-                    <div className="text-sm sm:text-xl font-semibold text-sky-200/90 truncate animate-appear mb-3 sm:mb-4">
-                      {winner.registration?.campName || '---'}
-                    </div>
-
-                    <div className="inline-block bg-gradient-to-r from-gold to-amber-500 text-midnight-navy font-black text-xs sm:text-base px-4 sm:px-6 py-1 sm:py-2 rounded-full uppercase tracking-wider animate-appear shadow-xl">
-                      {winner.prizeName}
-                    </div>
-                  </>
-                ) : isShuffling ? (
-                  <>
-                    <div className="font-mono text-2xl sm:text-4xl md:text-5xl font-black text-gold mb-1 sm:mb-2 tracking-wider drop-shadow-md">
-                      {shufflingItem?.ticketNumber || 'SHUFFLING...'}
-                    </div>
-                    <div className="text-xl sm:text-3xl md:text-4xl font-extrabold text-white mb-1 truncate">
-                      {shufflingItem?.registration?.fullName || '---'}
-                    </div>
-                    <div className="text-sm sm:text-xl font-semibold text-sky-200/90 truncate mb-3">
-                      {shufflingItem?.registration?.campName || '---'}
-                    </div>
-                    <div className="inline-block bg-white/20 border border-white/30 text-white font-bold text-xs sm:text-sm px-4 py-1 rounded-full uppercase tracking-widest animate-pulse">
-                      Shuffling Live...
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="font-mono text-2xl sm:text-4xl md:text-5xl font-black text-gold mb-1 sm:mb-2 tracking-wider">
-                      DYD26 RAFFLE
-                    </div>
-                    <div className="text-lg sm:text-2xl md:text-3xl font-extrabold text-white mb-1">
-                      Ready for Live Draw
-                    </div>
-                    <div className="text-xs sm:text-base font-semibold text-sky-200/80 mb-3">
-                      {tickets.length} Approved Entries in Pool
-                    </div>
-                    <div className="inline-block bg-royal-blue/60 border border-royal-blue-light/50 text-white font-semibold text-[11px] sm:text-xs px-3.5 py-1 rounded-full uppercase tracking-wider">
-                      Target: {customPrize || selectedPrize}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Celebration Pulse Rings */}
-              {winner && (
-                <div className="absolute inset-0 border-8 border-gold rounded-full animate-ping opacity-40 pointer-events-none" />
-              )}
-            </div>
-
-            {/* Winner Verification Code Banner */}
+            {/* Stage Winner Golden Stub Reveal */}
             {winner && (
-              <div className="mt-4 sm:mt-6 max-w-xl w-full bg-white/10 backdrop-blur-md border border-white/20 p-3 sm:p-4 rounded-2xl text-center shadow-xl animate-appear">
-                <span className="text-[10px] sm:text-xs text-sky-200 uppercase font-semibold tracking-wider block mb-0.5">
-                  Cryptographic Audit Verification Hash
-                </span>
-                <span className="font-mono text-xs sm:text-sm text-gold font-bold break-all select-all">
-                  {winner.verificationHash}
-                </span>
+              <div className="w-full max-w-2xl mt-4 z-20 animate-appear space-y-2">
+                <WinningTicketCard
+                  winner={winner}
+                  isOperator={isOperatorActive}
+                  onVoidRequest={() => {
+                    setStageVoidOpen(true);
+                    setStageVoidReason('');
+                    setStageVoidError('');
+                  }}
+                />
               </div>
             )}
           </div>
