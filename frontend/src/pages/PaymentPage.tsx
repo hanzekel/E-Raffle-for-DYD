@@ -5,7 +5,8 @@ import { api } from '../lib/api';
 import { RegistrationFormData } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { GcashQR } from '../components/GcashQR';
-import { AlertTriangleIcon } from '../components/icons/Icons';
+import { AlertTriangleIcon, CheckIcon } from '../components/icons/Icons';
+import { validateReceiptImage } from '../lib/receiptValidator';
 
 export const PaymentPage: React.FC = () => {
   const { config, loading } = useConfig();
@@ -16,6 +17,8 @@ export const PaymentPage: React.FC = () => {
   const [referenceNumber, setReferenceNumber] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isValidatingImage, setIsValidatingImage] = useState(false);
+  const [isReceiptVerified, setIsReceiptVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progressMsg, setProgressMsg] = useState('');
   const [formError, setFormError] = useState('');
@@ -34,17 +37,43 @@ export const PaymentPage: React.FC = () => {
 
   const totalAmount = registrationData.ticketCount * config.ticketPrice;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormError('');
+    setIsReceiptVerified(false);
     const selected = e.target.files?.[0];
-    if (selected) {
-      if (selected.size > 5 * 1024 * 1024) {
-        setFormError('Please select an image smaller than 5MB (JPEG, PNG, or WebP).');
+
+    if (!selected) {
+      setFile(null);
+      setPreview(null);
+      return;
+    }
+
+    setIsValidatingImage(true);
+    try {
+      // Analyze file health, blank canvas variance, and receipt text structure
+      const validation = await validateReceiptImage(selected);
+
+      if (!validation.isValid) {
+        setFormError(validation.error || 'Invalid proof of payment image.');
+        setFile(null);
+        setPreview(null);
+        setIsReceiptVerified(false);
+        e.target.value = '';
         return;
       }
+
       setFile(selected);
       const url = URL.createObjectURL(selected);
       setPreview(url);
+      setIsReceiptVerified(true);
+    } catch {
+      setFormError('Failed to inspect uploaded file. Please choose a valid screenshot.');
+      setFile(null);
+      setPreview(null);
+      setIsReceiptVerified(false);
+      e.target.value = '';
+    } finally {
+      setIsValidatingImage(false);
     }
   };
 
@@ -57,7 +86,14 @@ export const PaymentPage: React.FC = () => {
       return;
     }
     if (!file) {
-      setFormError('Please attach your proof of payment screenshot or photo before submitting.');
+      setFormError('Please attach a valid transaction proof before submitting.');
+      return;
+    }
+
+    // Re-verify receipt structure to prevent spoofing
+    const recheck = await validateReceiptImage(file);
+    if (!recheck.isValid) {
+      setFormError(recheck.error || 'The uploaded file does not pass transaction receipt verification.');
       return;
     }
 
@@ -211,21 +247,43 @@ export const PaymentPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-midnight-navy/70">
-              Proof of Payment
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-midnight-navy/70">
+                Proof of Payment
+              </label>
+              {isValidatingImage && (
+                <span className="text-xs text-royal-blue font-semibold animate-pulse flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-royal-blue animate-ping" />
+                  <span>Inspecting receipt structure...</span>
+                </span>
+              )}
+            </div>
             <div className="relative">
               <input 
                 type="file" 
                 accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileChange}
-                className="w-full text-sm text-midnight-navy/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-midnight-navy/10 file:text-midnight-navy hover:file:bg-midnight-navy/20 transition-all cursor-pointer bg-midnight-navy/[0.03] rounded-xl border border-dashed border-midnight-navy/20 hover:border-midnight-navy/40"
+                disabled={isValidatingImage || isSubmitting}
+                className="w-full text-sm text-midnight-navy/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-midnight-navy/10 file:text-midnight-navy hover:file:bg-midnight-navy/20 transition-all cursor-pointer bg-midnight-navy/[0.03] rounded-xl border border-dashed border-midnight-navy/20 hover:border-midnight-navy/40 disabled:opacity-50"
                 required
               />
             </div>
-            {preview && (
-              <div className="mt-6 flex justify-center animate-appear-zoom p-2 bg-midnight-navy/5 rounded-xl border border-midnight-navy/10 inline-block">
-                <img src={preview} alt="Proof preview" className="max-h-56 rounded-lg" />
+            <p className="text-[11px] text-slate-400 mt-1.5">
+              Attach an official screenshot of your GCash, Maya, or Bank confirmation slip. Blank or non-transaction images will not be accepted.
+            </p>
+
+            {preview && isReceiptVerified && (
+              <div className="mt-4 p-3 bg-emerald-50/60 rounded-2xl border border-emerald-200/80 animate-appear-zoom flex flex-col sm:flex-row items-center gap-3">
+                <img src={preview} alt="Proof preview" className="max-h-36 max-w-[120px] rounded-lg shadow-sm border border-emerald-200 object-cover" />
+                <div className="text-left space-y-1">
+                  <div className="flex items-center gap-1.5 text-emerald-700 text-xs font-bold">
+                    <CheckIcon size={16} className="text-emerald-600" />
+                    <span>Transaction Receipt Verified</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-900/80 leading-relaxed">
+                    Legible document layout and high-contrast text detected. Ready for submission.
+                  </p>
+                </div>
               </div>
             )}
           </div>
