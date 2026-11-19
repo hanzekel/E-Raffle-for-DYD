@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse, VercelApiHandler } from '@vercel/no
 import { prisma } from './prisma';
 import { ApiError, handleApiError } from './errors';
 import { getTokenFromCookies, verifyToken } from './auth';
+import { applyCorsHeaders } from './cors';
 
 export interface MiddlewareOptions {
   methods: string[];
@@ -57,26 +58,7 @@ export function withMiddleware(handler: VercelApiHandler, options: MiddlewareOpt
   return async (req: VercelRequest, res: VercelResponse) => {
     try {
       // 1. CORS setup
-      const requestOrigin = (req.headers.origin as string) || '';
-      const allowedOrigins = [
-        process.env.FRONTEND_URL,
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'http://127.0.0.1:5173',
-      ].filter(Boolean) as string[];
-
-      const matchedOrigin = allowedOrigins.find(o => o === requestOrigin);
-      if (matchedOrigin) {
-        res.setHeader('Access-Control-Allow-Origin', matchedOrigin);
-      } else if (process.env.FRONTEND_URL) {
-        res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
-      } else {
-        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
-      }
-      res.setHeader('Access-Control-Allow-Methods', options.methods.join(', ') + ', OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Vary', 'Origin');
+      applyCorsHeaders(req, res, options.methods);
 
       // 2. Handle OPTIONS preflight
       if (req.method === 'OPTIONS') {

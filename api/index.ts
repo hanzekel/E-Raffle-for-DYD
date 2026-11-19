@@ -1,10 +1,6 @@
-// Unified single serverless entrypoint for all DYD26 API endpoints (Vercel Hobby plan compatible)
-import express from 'express';
-import cors from 'cors';
-import { config } from 'dotenv';
-
-// Load environment variables for local testing
-config();
+// Zero-dependency Vercel Serverless API router (Hobby plan: 1 function total)
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { handleApiError } from './_lib/errors';
 
 import configHandler from './_routes/config';
 import registerHandler from './_routes/register';
@@ -25,71 +21,103 @@ import adminVoidDrawHandler from './_routes/admin/void-draw';
 import adminWinnersHandler from './_routes/admin/winners';
 import raffleWinnersHandler from './_routes/raffle/winners';
 
-const app = express();
+type RouteHandler = (req: VercelRequest, res: VercelResponse) => Promise<any> | any;
 
-// Global middleware
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
-app.use(express.json());
+const STATIC_ROUTES: Record<string, RouteHandler> = {
+  '/config': configHandler,
+  '/register': registerHandler,
+  '/upload-url': uploadUrlHandler,
+  '/payment': paymentHandler,
+  '/tickets/all': allTicketsHandler,
+  '/auth/verify-email': verifyEmailHandler,
+  '/admin/login': adminLoginHandler,
+  '/admin/logout': adminLogoutHandler,
+  '/admin/me': adminMeHandler,
+  '/admin/dashboard': adminDashboardHandler,
+  '/admin/winners': adminWinnersHandler,
+  '/admin/draw': adminDrawHandler,
+  '/admin/draw/void': adminVoidDrawHandler,
+  '/admin/void-draw': adminVoidDrawHandler,
+  '/raffle/winners': raffleWinnersHandler,
+};
 
-const router = express.Router();
+const DYNAMIC_ROUTES: { prefix: string; paramKey: string; handler: RouteHandler }[] = [
+  { prefix: '/tickets/', paramKey: 'orderId', handler: getTicketsHandler },
+  { prefix: '/admin/approve/', paramKey: 'id', handler: adminApproveHandler },
+  { prefix: '/admin/reject/', paramKey: 'id', handler: adminRejectHandler },
+  { prefix: '/admin/delete/', paramKey: 'id', handler: adminDeleteHandler },
+];
 
-// Helper to bridge Express params to Vercel req.query
-const wrap = (handler: any, paramMap?: { [key: string]: string }) => {
-  return async (req: express.Request, res: express.Response) => {
+// Normalize route path from Vercel rewrite (__path) or direct request URL
+function resolveRoutePath(req: VercelRequest): string {
+  const rewritten = req.query?.__path;
+  let rawPath = '';
+
+  if (typeof rewritten === 'string' && rewritten.length > 0) {
+    rawPath = `/${rewritten}`;
+  } else if (Array.isArray(rewritten) && rewritten.length > 0) {
+    rawPath = `/${rewritten.join('/')}`;
+  } else {
     try {
-      if (paramMap) {
-        req.query = req.query || {};
-        for (const [paramName, queryName] of Object.entries(paramMap)) {
-          if (req.params[paramName]) {
-            req.query[queryName] = req.params[paramName];
-          }
-        }
-      }
-      await handler(req as any, res as any);
-    } catch (err: any) {
-      if (!res.headersSent) {
-        res.status(err.statusCode || 500).json({
-          error: err.message || 'Internal Server Error',
-          code: err.code || 'INTERNAL_ERROR',
+      rawPath = new URL(req.url || '/', 'http://localhost').pathname;
+    } catch {
+      rawPath = (req.url || '/').split('?')[0];
+    }
+  }
+
+  // Strip /api prefix and trailing slash so both /api/config and /config resolve cleanly
+  let normalized = rawPath.replace(/^\/api(?=\/|$)/, '') || '/';
+  if (normalized.length > 1 && normalized.endsWith('/')) {
+    normalized = normalized.slice(0, -1);
+  }
+  return normalized;
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  try {
+    // Ensure req.query is always an object for param injection
+    if (!req.query) {
+      (req as any).query = {};
+    }
+
+    // Parse raw JSON string bodies defensively if an upstream proxy skipped parsing
+    if (typeof req.body === 'string' && req.body.trim().startsWith('{')) {
+      try {
+        (req as any).body = JSON.parse(req.body);
+      } catch {
+        return res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_JSON', message: 'Invalid JSON request payload.' },
         });
       }
     }
-  };
-};
 
-// Route definitions
-router.all('/config', wrap(configHandler));
-router.all('/register', wrap(registerHandler));
-router.all('/upload-url', wrap(uploadUrlHandler));
-router.all('/payment', wrap(paymentHandler));
-router.all('/tickets/all', wrap(allTicketsHandler));
-router.all('/tickets/:orderId', wrap(getTicketsHandler, { orderId: 'orderId' }));
-router.all('/auth/verify-email', wrap(verifyEmailHandler));
-router.all('/admin/login', wrap(adminLoginHandler));
-router.all('/admin/logout', wrap(adminLogoutHandler));
-router.all('/admin/me', wrap(adminMeHandler));
-router.all('/admin/dashboard', wrap(adminDashboardHandler));
-router.all('/admin/winners', wrap(adminWinnersHandler));
-router.all('/admin/approve/:id', wrap(adminApproveHandler, { id: 'id' }));
-router.all('/admin/reject/:id', wrap(adminRejectHandler, { id: 'id' }));
-router.all('/admin/delete/:id', wrap(adminDeleteHandler, { id: 'id' }));
-router.all('/admin/draw', wrap(adminDrawHandler));
-router.all('/admin/draw/void', wrap(adminVoidDrawHandler));
-router.all('/admin/void-draw', wrap(adminVoidDrawHandler));
-router.all('/raffle/winners', wrap(raffleWinnersHandler));
+    const routePath = resolveRoutePath(req);
 
-// Mount under both /api and / to handle all rewrite variants seamlessly
-app.use('/api', router);
-app.use('/', router);
+    // 1. Exact static route match
+    const staticHandler = STATIC_ROUTES[routePath];
+    if (staticHandler) {
+      return await staticHandler(req, res);
+    }
 
-// Export for Vercel Serverless Function deployment
-export default function handler(req: any, res: any) {
-  return app(req, res);
+    // 2. Single-segment dynamic route match
+    for (const route of DYNAMIC_ROUTES) {
+      if (routePath.startsWith(route.prefix)) {
+        const paramValue = routePath.slice(route.prefix.length);
+        if (paramValue && !paramValue.includes('/')) {
+          (req.query as Record<string, string>)[route.paramKey] = decodeURIComponent(paramValue);
+          return await route.handler(req, res);
+        }
+      }
+    }
+
+    return res.status(404).json({
+      success: false,
+      error: { code: 'NOT_FOUND', message: `API endpoint not found: ${routePath}` },
+    });
+  } catch (err) {
+    if (!res.headersSent) {
+      return handleApiError(err, res);
+    }
+  }
 }
-
-// Named export for local Express testing
-export { app };
-
