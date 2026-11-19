@@ -24,8 +24,8 @@ async function handler(_req: any, res: any) {
     data: {
       ticketPrice: Number(process.env.TICKET_PRICE || '100'),
       maxTickets: Number(process.env.MAX_TICKETS_PER_REGISTRATION || '10'),
-      gcashNumber: process.env.GCASH_NUMBER || '09171701054',
-      gcashName: process.env.GCASH_NAME || 'ANGELA KAYE LUPAC',
+      gcashNumber: '09171701054',
+      gcashName: 'ANGELA KAYE LUPAC',
       bankName: process.env.BANK_NAME,
       bankAccountNumber: process.env.BANK_ACCOUNT_NUMBER,
       bankAccountName: process.env.BANK_ACCOUNT_NAME,
