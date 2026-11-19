@@ -21,6 +21,12 @@ export const TicketsPage: React.FC = () => {
   const [data, setData] = useState<{ registration: Registration; tickets: Ticket[] } | null>(null);
 
   useEffect(() => {
+    if (activeOrderId) {
+      setInputOrderId(activeOrderId);
+    }
+  }, [activeOrderId]);
+
+  useEffect(() => {
     if (token && activeOrderId) {
       setLoading(true);
       api.get<{ registration: Registration; tickets: Ticket[] }>(`/tickets/${activeOrderId}?token=${token}`)
@@ -42,7 +48,10 @@ export const TicketsPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await api.post('/auth/verify-email', { email, orderId: inputOrderId });
+      const res = await api.post('/auth/verify-email', {
+        email: email.trim(),
+        orderId: inputOrderId.trim(),
+      });
       if (res.success) {
         setVerificationSent(true);
       } else {
@@ -176,10 +185,22 @@ export const TicketsPage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <button className="btn-secondary py-3 text-sm w-full flex items-center justify-center gap-2 group-hover:bg-midnight-navy/10">
-                    <svg className="w-5 h-5 text-midnight-navy/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    Download E-Ticket
-                  </button>
+                  {ticket.downloadUrl ? (
+                    <a
+                      href={ticket.downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={`${ticket.ticketNumber}.pdf`}
+                      className="btn-secondary py-3 text-sm w-full flex items-center justify-center gap-2 group-hover:bg-midnight-navy/10"
+                    >
+                      <svg className="w-5 h-5 text-midnight-navy/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                      Download E-Ticket
+                    </a>
+                  ) : (
+                    <span className="btn-secondary py-3 text-sm w-full flex items-center justify-center opacity-50 cursor-not-allowed">
+                      Ticket PDF unavailable
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

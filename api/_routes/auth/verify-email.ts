@@ -6,8 +6,8 @@ import { sendVerificationEmail } from '../../_lib/email';
 import { z } from 'zod';
 
 const requestSchema = z.object({
-  email: z.string().email(),
-  orderId: z.string().uuid(),
+  email: z.string().trim().email(),
+  orderId: z.string().trim().uuid(),
 });
 
 async function handler(req: any, res: any) {
@@ -26,12 +26,12 @@ async function handler(req: any, res: any) {
     throw new ApiError(404, 'Order not found', 'NOT_FOUND');
   }
 
-  if (registration.email !== email) {
+  if (registration.email.trim().toLowerCase() !== email.toLowerCase()) {
     throw new ApiError(403, 'Email does not match the order', 'EMAIL_MISMATCH');
   }
 
-  const token = generateToken({ email, orderId }); // uses JWT_SECRET and JWT_EXPIRY
-  await sendVerificationEmail(email, orderId, token);
+  const token = generateToken({ email: registration.email, orderId }); // uses JWT_SECRET and JWT_EXPIRY
+  await sendVerificationEmail(registration.email, orderId, token);
 
   return res.status(200).json({
     success: true,

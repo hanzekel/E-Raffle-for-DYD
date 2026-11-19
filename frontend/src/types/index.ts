@@ -39,6 +39,7 @@ export interface Ticket {
   registrationId: string;
   ticketNumber: string;
   status: 'active' | 'used' | 'void';
+  downloadUrl?: string | null;
 }
 
 export interface RegistrationFormData {

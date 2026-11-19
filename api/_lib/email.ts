@@ -5,6 +5,20 @@ function getSenderAddress(): string {
   return process.env.EMAIL_FROM || (process.env.SMTP_USER ? `DYD 2026 Raffle <${process.env.SMTP_USER}>` : 'noreply@dyd26.com');
 }
 
+function getFrontendUrl(): string {
+  const configured = process.env.FRONTEND_URL?.trim().replace(/\/+$/, '');
+  const isLocalhost = !configured || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configured);
+  if (!isLocalhost && configured) {
+    return configured;
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  return process.env.VERCEL === '1' || process.env.NODE_ENV === 'production'
+    ? 'https://dyd26-raffle.vercel.app'
+    : configured || 'https://dyd26-raffle.vercel.app';
+}
+
 export function createTransport() {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -27,8 +41,8 @@ export async function sendSubmissionConfirmationEmail(registration: {
   referenceNumber: string;
 }) {
   const transporter = createTransport();
-  const frontendUrl = process.env.FRONTEND_URL || 'https://dyd26-raffle.vercel.app';
-  const checkLink = `${frontendUrl}/verify`;
+  const frontendUrl = getFrontendUrl();
+  const checkLink = `${frontendUrl}/verify?orderId=${encodeURIComponent(registration.id)}`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 24px; border-radius: 12px;">
@@ -97,7 +111,7 @@ export async function sendApprovalEmail(
 
 export async function sendVerificationEmail(email: string, orderId: string, token: string) {
   const transporter = createTransport();
-  const frontendUrl = process.env.FRONTEND_URL || 'https://dyd26-raffle.vercel.app';
+  const frontendUrl = getFrontendUrl();
   const verificationLink = `${frontendUrl}/tickets/${orderId}?token=${token}`;
 
   const html = `

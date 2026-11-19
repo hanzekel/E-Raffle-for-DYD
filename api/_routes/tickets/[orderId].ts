@@ -5,7 +5,8 @@ import { prisma } from '../../_lib/prisma';
 import { getSignedUrl } from '../../_lib/supabase';
 
 async function handler(req: any, res: any) {
-  const orderId = req.query.orderId || req.params?.orderId || req.query.id || req.params?.id;
+  const rawOrderId = req.query.orderId || req.params?.orderId || req.query.id || req.params?.id;
+  const orderId = typeof rawOrderId === 'string' ? rawOrderId.trim() : '';
   const token = req.query.token as string;
 
   if (!token) {
@@ -19,18 +20,17 @@ async function handler(req: any, res: any) {
     throw new ApiError(401, 'Invalid or expired verification token', 'INVALID_TOKEN');
   }
 
-  console.log('decoded.orderId:', decoded.orderId, 'req.query.orderId:', orderId);
-
   if (decoded.orderId !== orderId) {
     throw new ApiError(403, 'Token does not match this order', 'TOKEN_MISMATCH');
   }
 
   const registration = await prisma.registration.findUnique({
-    where: { id: orderId as string },
+    where: { id: orderId },
     include: { tickets: true },
   });
 
-  if (!registration || registration.email !== decoded.email) {
+  const decodedEmail = typeof decoded.email === 'string' ? decoded.email.trim().toLowerCase() : '';
+  if (!registration || registration.email.trim().toLowerCase() !== decodedEmail) {
     throw new ApiError(404, 'Registration not found', 'NOT_FOUND');
   }
 
@@ -47,6 +47,7 @@ async function handler(req: any, res: any) {
         }
       }
       return {
+        id: ticket.id,
         ticketNumber: ticket.ticketNumber,
         downloadUrl,
       };
@@ -57,9 +58,12 @@ async function handler(req: any, res: any) {
     success: true,
     data: {
       registration: {
+        id: registration.id,
         fullName: registration.fullName,
         campName: registration.campName,
+        ticketCount: registration.ticketCount,
         status: registration.status,
+        rejectionNote: registration.rejectionNote,
       },
       tickets: ticketsWithUrls,
     },
