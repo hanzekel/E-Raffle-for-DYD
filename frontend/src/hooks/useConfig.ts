@@ -5,8 +5,8 @@ import { ConfigData } from '../types';
 export const FALLBACK_CONFIG: ConfigData = {
   ticketPrice: 100,
   maxTickets: 10,
-  gcashNumber: '09XXXXXXXXX',
-  gcashName: 'MOPCY DYD 2026',
+  gcashNumber: '09171701054',
+  gcashName: 'ANGELA KAYE LUPAC',
   bankName: 'BDO / BPI',
   bankAccountNumber: 'XXXX-XXXX-XXXX',
   bankAccountName: 'MOPCY DYD 2026',
