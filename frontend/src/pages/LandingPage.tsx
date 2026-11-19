@@ -20,7 +20,7 @@ export const LandingPage: React.FC = () => {
   const [demoCamp, setDemoCamp] = useState<string>('');
 
   // Target draw date from config or fallback
-  const targetDateStr = config?.drawDate || '2026-11-28T18:00:00+08:00';
+  const targetDateStr = config?.drawDate || '2026-12-11T13:30:00+08:00';
 
   // Dynamic countdown timer
   const [isDrawLive, setIsDrawLive] = useState<boolean>(false);

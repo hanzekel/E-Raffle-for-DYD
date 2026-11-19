@@ -29,7 +29,7 @@ export const FALLBACK_CONFIG: ConfigData = {
     'Philippine National Police',
     'Other',
   ],
-  drawDate: '2026-11-28T18:00:00+08:00',
+  drawDate: '2026-12-11T13:30:00+08:00',
 };
 
 export const useConfig = () => {

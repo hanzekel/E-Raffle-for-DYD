@@ -30,7 +30,7 @@ async function handler(_req: any, res: any) {
       bankAccountNumber: process.env.BANK_ACCOUNT_NUMBER,
       bankAccountName: process.env.BANK_ACCOUNT_NAME,
       campNames: CAMP_NAMES,
-      drawDate: process.env.RAFFLE_DRAW_DATE || '2026-11-28T18:00:00+08:00',
+      drawDate: process.env.RAFFLE_DRAW_DATE || '2026-12-11T13:30:00+08:00',
       eligibleEntries,
     },
   });
