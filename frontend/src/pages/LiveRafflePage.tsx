@@ -176,13 +176,13 @@ export const LiveRafflePage: React.FC = () => {
         setStageVoidError((res.error as any)?.message || res.error || 'Failed to void draw.');
       }
     } catch {
-      setStageVoidError('Network error while connecting to vault.');
+      setStageVoidError('Having trouble connecting right now. Please try again in a second.');
     } finally {
       setIsStageVoiding(false);
     }
   };
 
-  if (loading) return <LoadingSpinner message="Connecting to Raffle Vault..." />;
+  if (loading) return <LoadingSpinner message="Loading the live raffle..." />;
 
   // Whether active draw controls are displayed
   const isOperatorActive = isAdmin && !previewAsPublic;
@@ -201,10 +201,10 @@ export const LiveRafflePage: React.FC = () => {
               <div className="text-left">
                 <span className="text-xs font-bold text-gold flex items-center gap-1.5">
                   <ShieldIcon size={14} />
-                  <span>{isOperatorActive ? 'Logged in as Admin (Stage Operator)' : 'Admin Previewing Public View'}</span>
+                  <span>{isOperatorActive ? 'Admin Mode (Live Controls)' : 'Previewing Audience View'}</span>
                 </span>
                 <span className="text-[10px] text-slate-300 block">
-                  {isOperatorActive ? 'Draw controls enabled' : 'Controls hidden for audience perspective'}
+                  {isOperatorActive ? 'Ready to pick winners' : 'Draw buttons hidden'}
                 </span>
               </div>
             </div>
@@ -242,19 +242,19 @@ export const LiveRafflePage: React.FC = () => {
           <div className="bg-white/80 backdrop-blur border border-slate-200 px-3.5 py-2 rounded-xl text-center text-xs text-slate-600 flex items-center justify-between">
             <span className="flex items-center gap-1.5 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Public Spectator Mode (Audience View)</span>
+              <span>Audience View</span>
             </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleStageMode}
                 className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-700 font-semibold transition-colors inline-flex items-center gap-1.5"
-                title="Enter Fullscreen Stage Mode"
+                title="Open Fullscreen View"
               >
                 <ExpandIcon size={13} />
-                <span>Stage Fullscreen</span>
+                <span>Fullscreen</span>
               </button>
               <Link to="/admin/login" className="text-royal-blue font-bold hover:underline text-[11px]">
-                Stage Operator Login &rarr;
+                Admin Login &rarr;
               </Link>
             </div>
           </div>
@@ -266,14 +266,14 @@ export const LiveRafflePage: React.FC = () => {
         <div className="inline-flex items-center gap-1.5 mb-2 sm:mb-3 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full border border-gold/30 bg-gold/10 backdrop-blur-md mx-auto">
           <span className="text-[11px] sm:text-xs font-bold text-royal-blue uppercase tracking-wider inline-flex items-center gap-1.5">
             <LockIcon size={14} />
-            <span>Official Verified Raffle Draw</span>
+            <span>Official DYD 2026 Raffle</span>
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl md:text-6xl font-heading font-black gradient-text leading-tight py-1 mb-1.5 sm:mb-2">
           DYD 2026 Grand Raffle Draw
         </h1>
         <p className="text-xs sm:text-base text-slate-600 font-medium">
-          {tickets.length} approved eligible entries ready for the draw
+          {tickets.length} {tickets.length === 1 ? 'ticket' : 'tickets'} in the draw right now
         </p>
       </div>
 
@@ -285,7 +285,7 @@ export const LiveRafflePage: React.FC = () => {
               <DiceIcon size={16} />
               <span>Stage Draw Controls</span>
             </span>
-            <span className="text-emerald-400 font-semibold text-[11px]">CSPRNG Vault Ready</span>
+            <span className="text-emerald-400 font-semibold text-[11px]">Ready to Draw</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
@@ -396,14 +396,14 @@ export const LiveRafflePage: React.FC = () => {
           <div>
             <h2 className="font-heading font-bold text-lg sm:text-xl text-slate-900 flex items-center gap-2">
               <TicketIcon size={20} className="text-royal-blue" />
-              <span>Eligible Ticket Pool</span>
+              <span>Who&apos;s In The Draw</span>
             </h2>
             <p className="text-xs text-slate-500">
-              Approved tickets active in the raffle pool. Names masked for privacy.
+              All approved tickets in the raffle right now (names kept private).
             </p>
           </div>
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full whitespace-nowrap">
-            {tickets.length} Approved Entries
+            {tickets.length} Tickets Ready
           </span>
         </div>
 
@@ -497,7 +497,7 @@ export const LiveRafflePage: React.FC = () => {
                   DYD 2026 Live Raffle Stage
                 </span>
                 <span className="text-[11px] sm:text-xs text-sky-200/80 font-medium">
-                  {tickets.length} Approved Entries in Vault Pool
+                  {tickets.length} Tickets In The Draw
                 </span>
               </div>
             </div>
@@ -592,7 +592,7 @@ export const LiveRafflePage: React.FC = () => {
               </div>
             ) : (
               <div className="text-center text-xs text-slate-400 font-medium py-1">
-                Official Live Raffle Draw &bull; Verified Cryptographic CSPRNG Vault &bull; DYD 2026
+                Official DYD 2026 Live Raffle Draw &bull; Transparent &amp; Fair
               </div>
             )}
           </div>
@@ -651,17 +651,17 @@ export const LiveRafflePage: React.FC = () => {
 
             <div className="mb-5">
               <label className="block text-xs font-bold text-slate-300 mb-1">
-                Mandatory Audit Note <span className="text-rose-400">*</span>
+                Quick Reason <span className="text-rose-400">*</span>
               </label>
               <textarea
                 value={stageVoidReason}
                 onChange={e => setStageVoidReason(e.target.value)}
-                placeholder="Enter void reason (e.g. 'Participant not present after 3 calls', 'Duplicate / disqualified')"
+                placeholder="Type why we're redrawing (e.g. 'Winner isn't here after 3 calls')"
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-400 h-24 resize-none"
                 required
               />
               <span className="text-[10px] text-slate-400 block mt-1">
-                Recorded permanently in the official audit trail (min. 5 characters).
+                Saved to our official draw log so everything stays fair (at least 5 characters).
               </span>
             </div>
 

@@ -18,14 +18,14 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
   if (file.size < MIN_SIZE_BYTES) {
     return {
       isValid: false,
-      error: 'The uploaded file is too small to be a readable transaction receipt (minimum 12KB). Please upload your full payment screenshot.',
+      error: 'That file looks too small—please upload the full screenshot of your GCash receipt.',
     };
   }
 
   if (file.size > MAX_SIZE_BYTES) {
     return {
       isValid: false,
-      error: 'File size exceeds the 5MB limit. Please choose a smaller JPEG, PNG, or WebP screenshot.',
+      error: 'That file is a bit too big (max 5MB). Try uploading a smaller screenshot.',
     };
   }
 
@@ -33,7 +33,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
   if (!validMimes.includes(file.type)) {
     return {
       isValid: false,
-      error: 'Unsupported file type. Please upload a JPEG, PNG, or WebP screenshot.',
+      error: 'Please upload a photo or screenshot (JPG or PNG).',
     };
   }
 
@@ -53,7 +53,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
     if (w < 250 || h < 250) {
       return {
         isValid: false,
-        error: `Image resolution is too low (${w}×${h}px). Receipts require at least 250×250px so reference numbers and amounts can be verified.`,
+        error: 'This photo looks too blurry or tiny to read. Please upload a clearer GCash screenshot.',
       };
     }
 
@@ -62,7 +62,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
     if (aspectRatio < 0.2 || aspectRatio > 5.0) {
       return {
         isValid: false,
-        error: 'Unusual image aspect ratio. Please upload a standard mobile screenshot or receipt photo.',
+        error: 'Hmm, this image shape looks off. Please upload a normal screenshot of your GCash receipt.',
       };
     }
 
@@ -124,7 +124,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
     if (stdDev < 12 || colorBuckets.size < 10) {
       return {
         isValid: false,
-        error: 'The uploaded image appears to be blank or a solid color. Please upload your actual GCash confirmation receipt.',
+        error: 'Oops, that looks like a blank image! Please upload your actual GCash receipt screenshot.',
         metrics: { width: w, height: h, stdDev, edgeDensity: 0 },
       };
     }
@@ -154,7 +154,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
     if (edgeDensity < 1.4) {
       return {
         isValid: false,
-        error: 'Image does not appear to contain legible transaction details or receipt structure. Please upload a clear screenshot of your GCash transaction receipt.',
+        error: 'We could not spot a GCash receipt here. Make sure your screenshot clearly shows the payment details.',
         metrics: { width: w, height: h, stdDev, edgeDensity },
       };
     }
@@ -166,7 +166,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
   } catch (err: any) {
     return {
       isValid: false,
-      error: 'Unable to process image. Please ensure the file is an uncorrupted JPEG, PNG, or WebP photo.',
+      error: 'Could not open that photo—try uploading a regular JPG or PNG screenshot instead.',
     };
   } finally {
     URL.revokeObjectURL(objectUrl);

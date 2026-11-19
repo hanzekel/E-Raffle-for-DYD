@@ -53,7 +53,7 @@ export const PaymentPage: React.FC = () => {
       const validation = await validateReceiptImage(selected);
 
       if (!validation.isValid) {
-        setFormError(validation.error || 'Invalid proof of payment image.');
+        setFormError(validation.error || 'Please upload a clear GCash receipt screenshot.');
         setFile(null);
         setPreview(null);
         setIsReceiptVerified(false);
@@ -66,7 +66,7 @@ export const PaymentPage: React.FC = () => {
       setPreview(url);
       setIsReceiptVerified(true);
     } catch {
-      setFormError('Failed to inspect uploaded file. Please choose a valid screenshot.');
+      setFormError('Could not read that photo. Please pick a clear GCash screenshot.');
       setFile(null);
       setPreview(null);
       setIsReceiptVerified(false);
@@ -81,40 +81,40 @@ export const PaymentPage: React.FC = () => {
     setFormError('');
 
     if (!referenceNumber.match(/^[a-zA-Z0-9]{8,30}$/)) {
-      setFormError('Please enter a valid reference number (8 to 30 letters or numbers).');
+      setFormError('Double-check your reference number—it should be 8 to 30 letters or numbers.');
       return;
     }
     if (!file) {
-      setFormError('Please attach a valid transaction proof before submitting.');
+      setFormError('Please upload your GCash receipt screenshot first.');
       return;
     }
 
     // Re-verify receipt structure to prevent spoofing
     const recheck = await validateReceiptImage(file);
     if (!recheck.isValid) {
-      setFormError(recheck.error || 'The uploaded file does not pass transaction receipt verification.');
+      setFormError(recheck.error || 'That does not look like a valid GCash receipt screenshot.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      setProgressMsg('Connecting to secure upload storage...');
+      setProgressMsg('Getting things ready...');
       const uploadRes = await api.post<{ uploadUrl: string; filePath: string }>('/upload-url', {
         contentType: file.type,
         fileSize: file.size,
       });
 
       if (!uploadRes.success || !uploadRes.data) {
-        throw new Error(uploadRes.error || 'Unable to prepare secure upload link. Please try again.');
+        throw new Error(uploadRes.error || 'Could not start your upload right now. Please try again.');
       }
 
-      setProgressMsg('Uploading your proof of payment...');
+      setProgressMsg('Uploading your GCash receipt...');
       const uploaded = await api.uploadDirect(uploadRes.data.uploadUrl, file);
       if (!uploaded) {
-        throw new Error('Image upload interrupted. Please check your connection and try again.');
+        throw new Error('Upload got interrupted. Check your connection and try again.');
       }
 
-      setProgressMsg('Securing your tickets...');
+      setProgressMsg('Locking in your tickets...');
       const finalRes = await api.post<{ registrationId: string }>('/payment', {
         ...registrationData,
         paymentMethod: 'gcash',
@@ -218,7 +218,7 @@ export const PaymentPage: React.FC = () => {
               {isValidatingImage && (
                 <span className="text-xs text-royal-blue font-semibold animate-pulse flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-royal-blue animate-ping" />
-                  <span>Inspecting receipt structure...</span>
+                  <span>Checking your screenshot...</span>
                 </span>
               )}
             </div>
@@ -233,7 +233,7 @@ export const PaymentPage: React.FC = () => {
               />
             </div>
             <p className="text-[11px] text-slate-400 mt-1.5">
-              Attach an official screenshot of your GCash transaction receipt. Blank or non-transaction images will not be accepted.
+              Drop a clear screenshot of your GCash receipt. Blank or unrelated photos will not go through.
             </p>
 
             {preview && isReceiptVerified && (
@@ -242,10 +242,10 @@ export const PaymentPage: React.FC = () => {
                 <div className="text-left space-y-1">
                   <div className="flex items-center gap-1.5 text-emerald-700 text-xs font-bold">
                     <CheckIcon size={16} className="text-emerald-600" />
-                    <span>Transaction Receipt Verified</span>
+                    <span>Receipt looks good!</span>
                   </div>
                   <p className="text-[11px] text-emerald-900/80 leading-relaxed">
-                    Legible document layout and high-contrast text detected. Ready for submission.
+                    Your GCash screenshot is clear and ready to send.
                   </p>
                 </div>
               </div>

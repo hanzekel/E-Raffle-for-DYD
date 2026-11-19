@@ -64,12 +64,12 @@ export const LandingPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-slate-700">
-            E-Raffle Portal Active &bull; Diocesan Youth Day 2026
+            Raffle Now Open &bull; Diocesan Youth Day 2026
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[11px] sm:text-xs font-semibold text-royal-blue bg-royal-blue/10 px-2.5 sm:px-3 py-1 rounded-full">
-            {typeof config?.eligibleEntries === 'number' ? `${config.eligibleEntries} Eligible Entries Live` : '40 Years in Mission'}
+            {typeof config?.eligibleEntries === 'number' ? `${config.eligibleEntries} Tickets In The Draw` : '40 Years in Mission'}
           </span>
           <span className="text-[11px] sm:text-xs font-bold text-gold bg-midnight-navy px-2.5 sm:px-3 py-1 rounded-full">
             ₱{config?.ticketPrice || 100} / Entry
@@ -94,7 +94,7 @@ export const LandingPage: React.FC = () => {
                 Your Ticket. <span className="text-gold">Their Mission.</span> One Grand Day.
               </h1>
               <p className="text-slate-200 text-xs sm:text-sm leading-relaxed max-w-xl mb-4 sm:mb-5">
-                Secure your official Diocesan Youth Day 2026 raffle entries online. Instant verified digital ticket, GCash payment integration, and live public draw.
+                Grab your official Diocesan Youth Day 2026 raffle tickets online! Quick GCash checkout, instant e-tickets, and a real live stage draw.
               </p>
 
               {/* Action Buttons */}
@@ -120,21 +120,21 @@ export const LandingPage: React.FC = () => {
                 <span className="w-8 h-8 rounded-lg bg-gold/20 text-gold flex items-center justify-center font-bold text-sm shrink-0">₱</span>
                 <div className="text-left text-xs">
                   <span className="font-bold text-white block">100% Youth Mission</span>
-                  <span className="text-[10px] text-slate-300">Direct diocesan subsidies</span>
+                  <span className="text-[10px] text-slate-300">Helps send youth delegates to camp</span>
                 </div>
               </div>
               <div className="flex items-center gap-2.5 bg-white/5 backdrop-blur-sm p-2.5 rounded-xl border border-white/10">
                 <span className="w-8 h-8 rounded-lg bg-sky-400/20 text-sky-300 flex items-center justify-center font-bold text-sm shrink-0">⚡</span>
                 <div className="text-left text-xs">
                   <span className="font-bold text-white block">Instant E-Ticket</span>
-                  <span className="text-[10px] text-slate-300">Automated vault code</span>
+                  <span className="text-[10px] text-slate-300">Sent straight to your email</span>
                 </div>
               </div>
               <div className="flex items-center gap-2.5 bg-white/5 backdrop-blur-sm p-2.5 rounded-xl border border-white/10">
                 <span className="w-8 h-8 rounded-lg bg-emerald-400/20 text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0"><LockIcon size={14} /></span>
                 <div className="text-left text-xs">
-                  <span className="font-bold text-white block">CSPRNG Verified</span>
-                  <span className="text-[10px] text-slate-300">Provably fair live draw</span>
+                  <span className="font-bold text-white block">100% Fair Draw</span>
+                  <span className="text-[10px] text-slate-300">Every ticket gets an equal shot</span>
                 </div>
               </div>
             </div>
@@ -254,7 +254,7 @@ export const LandingPage: React.FC = () => {
           )}
 
           <p className="text-[11px] text-slate-500 mt-2">
-            Draw takes place live with Diocesan Youth Council auditors.
+            Drawn live on stage with our youth council team.
           </p>
         </div>
 
@@ -277,7 +277,7 @@ export const LandingPage: React.FC = () => {
               <LockIcon size={16} className="text-gold" />
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              Major prizes being finalized by the organizing committee! Official announcements dropping across diocesan social channels soon.
+              Big prizes are locked in and dropping soon! Watch our official socials for the full reveal.
             </p>
           </div>
 
@@ -329,7 +329,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <p className="text-[10px] text-slate-400 mt-3">
-            Organized by the Diocesan Youth Ministry with full financial reporting post-draw.
+            Run by the Diocesan Youth Ministry with open updates after the event.
           </p>
         </div>
 
@@ -341,10 +341,10 @@ export const LandingPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-heading font-bold text-slate-900 text-sm">
-                Transparent E-Raffle System
+                Fair &amp; Open Raffle
               </h4>
               <p className="text-xs text-slate-500">
-                Official automated draw. Every ticket has a verified unique number for a 100% fair and transparent raffle.
+                Every ticket gets its own unique number—no tricks, just a real live draw anyone can watch.
               </p>
             </div>
           </div>
@@ -353,7 +353,7 @@ export const LandingPage: React.FC = () => {
             to="/live"
             className="w-full sm:w-auto text-xs font-bold text-royal-blue hover:text-midnight-navy px-5 py-2.5 rounded-full border border-royal-blue/30 bg-white whitespace-nowrap text-center shadow-sm"
           >
-            Preview Draw Screen &rarr;
+            Watch Live Draw &rarr;
           </Link>
         </div>
       </div>

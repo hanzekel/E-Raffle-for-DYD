@@ -491,8 +491,8 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
           <span className={`w-2 h-2 rounded-full ${tickets.length > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
           <span>
             {tickets.length === 0
-              ? 'Vault Empty (0 Verified)'
-              : `${tickets.length} Verified ${tickets.length === 1 ? 'Ticket' : 'Tickets'} in Chamber`}
+              ? '0 Tickets Yet'
+              : `${tickets.length} ${tickets.length === 1 ? 'Ticket' : 'Tickets'} in the Draw`}
           </span>
         </div>
 
@@ -517,7 +517,7 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
               }`}
             >
               <span className={`text-[9px] font-black uppercase tracking-widest block ${scannedTicket.isLocked ? 'text-midnight-navy/80' : 'text-gold'}`}>
-                {scannedTicket.isLocked ? '✓ Locked On Winning Ticket' : 'Scanning Verified Pool...'}
+                {scannedTicket.isLocked ? '✓ Winner Picked!' : 'Picking a Winner...'}
               </span>
               <div className="font-mono text-base sm:text-xl font-black tracking-wider">
                 {scannedTicket.ticketNumber}
@@ -533,7 +533,7 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
         {drawPhase === 'mixing' && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 px-4 py-1.5 rounded-full bg-gold/95 text-midnight-navy font-black text-xs uppercase tracking-widest shadow-xl flex items-center gap-2 animate-pulse whitespace-nowrap">
             <span className="w-2 h-2 rounded-full bg-midnight-navy animate-ping" />
-            <span>Mixing {tickets.length} Verified {tickets.length === 1 ? 'Ticket' : 'Tickets'}...</span>
+            <span>Shuffling {tickets.length} {tickets.length === 1 ? 'Ticket' : 'Tickets'}...</span>
           </div>
         )}
 
@@ -541,9 +541,9 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
         {tickets.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
             <div className="bg-slate-900/75 border border-white/15 backdrop-blur-md rounded-2xl px-5 py-4 max-w-sm">
-              <p className="text-sm font-bold text-white mb-1">No Verified Tickets in Chamber</p>
+              <p className="text-sm font-bold text-white mb-1">No Tickets In The Draw Yet</p>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Approve participant payments in the Admin Dashboard to add their verified tickets here.
+                Once payments get approved by the team, tickets will drop right in here!
               </p>
             </div>
           </div>

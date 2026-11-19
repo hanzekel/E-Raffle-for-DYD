@@ -21,13 +21,13 @@ export const ConfirmationPage: React.FC = () => {
           </svg>
         </div>
         
-        <h1 className="text-3xl sm:text-4xl font-heading font-semibold mb-4 gradient-text">Payment Submitted!</h1>
+        <h1 className="text-3xl sm:text-4xl font-heading font-semibold mb-4 gradient-text">You&apos;re All Set!</h1>
         <p className="text-midnight-navy/60 mb-10 text-lg leading-relaxed max-w-md mx-auto">
-          Your payment is currently under review. Your e-tickets will be sent to your email upon approval.
+          We got your GCash receipt! Our team is checking it now—your e-tickets will arrive in your email once approved.
         </p>
 
         <div className="bg-midnight-navy/[0.03] p-6 rounded-2xl mb-10 border border-midnight-navy/[0.08]">
-          <p className="text-sm text-midnight-navy/50 mb-2 uppercase tracking-wider font-medium">Registration ID</p>
+          <p className="text-sm text-midnight-navy/50 mb-2 uppercase tracking-wider font-medium">Your Ticket Code (Save this!)</p>
           <p className="font-mono font-semibold text-gold text-2xl tracking-wider select-all">{id}</p>
         </div>
 

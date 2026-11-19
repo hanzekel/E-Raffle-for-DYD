@@ -7,13 +7,13 @@ export const NotFoundPage: React.FC = () => {
       <div className="card w-full p-8 sm:p-10 border border-slate-200 shadow-lg bg-white">
         <span className="text-5xl mb-4 block">🧭</span>
         <span className="text-xs font-bold uppercase tracking-widest text-gold bg-midnight-navy px-3 py-1 rounded-full inline-block mb-3">
-          Error 404
+          Wrong Turn
         </span>
         <h1 className="text-3xl font-heading font-black text-slate-900 mb-3">
-          Page Not Found
+          Oops, nothing&apos;s here!
         </h1>
         <p className="text-sm text-slate-600 mb-8 leading-relaxed">
-          The link you followed might have expired, moved, or was typed with a small typo.
+          That page might have moved or the link has a small typo. Let&apos;s get you back on track!
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

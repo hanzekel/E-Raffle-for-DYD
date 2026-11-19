@@ -89,7 +89,7 @@ export const WinningTicketCard: React.FC<WinningTicketCardProps> = ({
 
             <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
               <ShieldIcon size={12} />
-              <span>CSPRNG Vaulted</span>
+              <span>Official Entry</span>
             </div>
           </div>
 
@@ -116,12 +116,12 @@ export const WinningTicketCard: React.FC<WinningTicketCardProps> = ({
               </div>
             </div>
 
-            {/* SHA-256 Audit Hash */}
+            {/* Verification Code */}
             <div className="pt-2">
               <div className="bg-black/40 border border-white/10 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
                 <div className="text-left overflow-hidden">
                   <span className="text-[9px] text-slate-400 uppercase font-bold block">
-                    Cryptographic Audit Hash
+                    Ticket Verification Code
                   </span>
                   <span className="font-mono text-[10px] text-sky-300 font-medium truncate block max-w-[220px] sm:max-w-xs">
                     {winner.verificationHash}
@@ -130,7 +130,7 @@ export const WinningTicketCard: React.FC<WinningTicketCardProps> = ({
                 <button
                   onClick={copyHash}
                   className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors flex items-center gap-1 shrink-0"
-                  title="Copy verification hash"
+                  title="Copy verification code"
                 >
                   {copied ? <CheckIcon size={13} className="text-emerald-400" /> : <CopyIcon size={13} />}
                   <span className="text-[10px]">{copied ? 'Copied' : 'Copy'}</span>

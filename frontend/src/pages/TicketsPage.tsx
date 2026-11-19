@@ -50,7 +50,7 @@ export const TicketsPage: React.FC = () => {
         setError(errorMsg as string);
       }
     } catch {
-      setError('Network error (Please make sure the backend server is running)');
+      setError('Having trouble connecting right now—give it a refresh in a few seconds!');
     } finally {
       setLoading(false);
     }
@@ -62,16 +62,16 @@ export const TicketsPage: React.FC = () => {
         <div className="card text-center relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-radial-gradient from-gold/10 to-transparent opacity-50 blur-3xl pointer-events-none"></div>
           
-          <h2 className="text-3xl font-heading font-semibold mb-6 gradient-text relative z-10">Access E-Tickets</h2>
+          <h2 className="text-3xl font-heading font-semibold mb-6 gradient-text relative z-10">Find My Tickets</h2>
           
           {verificationSent ? (
             <div className="text-center p-6 bg-midnight-navy/5 border border-midnight-navy/10 rounded-xl relative z-10">
-              <p className="text-gold font-medium">Verification link sent to your email.</p>
-              <p className="text-sm text-midnight-navy/50 mt-2">Please check your inbox.</p>
+              <p className="text-gold font-medium">We sent a link to your email!</p>
+              <p className="text-sm text-midnight-navy/50 mt-2">Check your inbox (or spam folder just in case) to view your tickets.</p>
             </div>
           ) : (
             <form onSubmit={handleVerify} className="space-y-6 relative z-10 text-left">
-              <p className="text-midnight-navy/60 text-sm mb-4 leading-relaxed">Enter your registered email and Order ID to receive a secure access link.</p>
+              <p className="text-midnight-navy/60 text-sm mb-4 leading-relaxed">Drop the email and ticket code you used when registering, and we&apos;ll send your ticket link straight to your inbox.</p>
               
               {!paramOrderId && (
                 <div>

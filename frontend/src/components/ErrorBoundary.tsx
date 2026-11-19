@@ -38,10 +38,10 @@ export class ErrorBoundary extends Component<Props, State> {
               🕊️
             </div>
             <h1 className="text-2xl font-heading font-bold text-slate-900 mb-2">
-              Something unexpected happened
+              Well, that was unexpected
             </h1>
             <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-              We had trouble loading this part of the website. Your registrations and tickets are safe in our vault.
+              Something glitched while loading this page—don&apos;t worry, your info and tickets are totally safe.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button

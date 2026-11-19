@@ -128,16 +128,16 @@ export const AdminDashboardPage: React.FC = () => {
         } else {
           setNoticeModal({
             type: 'error',
-            title: 'Deletion Failed',
-            message: res.error || 'Failed to delete record from database.',
+            title: 'Could Not Delete',
+            message: res.error || 'Could not delete that entry right now. Please try again.',
           });
         }
       }
     } catch {
       setNoticeModal({
         type: 'error',
-        title: 'Connection Error',
-        message: 'Network error communicating with the server. Please check your internet connection.',
+        title: 'Connection Issue',
+        message: 'Having trouble connecting right now. Check your internet and try again.',
       });
     } finally {
       setIsActionRunning(false);
@@ -160,7 +160,7 @@ export const AdminDashboardPage: React.FC = () => {
     if (!voidModalWinner) return;
     const cleanReason = voidReason.trim();
     if (cleanReason.length < 5) {
-      setVoidError('Audit reason must be at least 5 characters (e.g. absent during roll call, disqualified).');
+      setVoidError('Please write a short reason (at least 5 characters, e.g. winner wasn\'t here).');
       return;
     }
 
@@ -182,10 +182,10 @@ export const AdminDashboardPage: React.FC = () => {
           navigate('/live');
         }
       } else {
-        setVoidError((res.error as any)?.message || res.error || 'Failed to void draw record. Please try again.');
+        setVoidError((res.error as any)?.message || res.error || 'Could not void that winner right now. Please try again.');
       }
     } catch {
-      setVoidError('Network error while connecting to vault. Please retry.');
+      setVoidError('Having trouble connecting right now. Please try again!');
     } finally {
       setIsVoiding(false);
     }
@@ -213,7 +213,7 @@ export const AdminDashboardPage: React.FC = () => {
         });
         return;
       }
-      const headers = ['Prize Name', 'Winning Ticket', 'Winner Name', 'Email', 'Camp', 'Drawn At', 'Audit Hash', 'Status', 'Void Reason'];
+      const headers = ['Prize Name', 'Winning Ticket', 'Winner Name', 'Email', 'Camp', 'Drawn At', 'Winner Code', 'Status', 'Void Reason'];
       const rows = winners.map(w => [
         `"${w.prizeName.replace(/"/g, '""')}"`,
         `"${w.ticketNumber}"`,
@@ -356,7 +356,7 @@ export const AdminDashboardPage: React.FC = () => {
                     <th className="p-4 lg:p-5">Winner (Unmasked)</th>
                     <th className="p-4 lg:p-5">Camp</th>
                     <th className="p-4 lg:p-5">Drawn At</th>
-                    <th className="p-4 lg:p-5">Verification Hash</th>
+                    <th className="p-4 lg:p-5">Winner Code</th>
                     <th className="p-4 lg:p-5">Status</th>
                     <th className="p-4 lg:p-5 text-right">Actions</th>
                   </tr>
@@ -386,8 +386,8 @@ export const AdminDashboardPage: React.FC = () => {
                           title={win.verificationHash}
                           onClick={() => setNoticeModal({
                             type: 'hash',
-                            title: 'Cryptographic Audit Hash',
-                            message: 'Official SHA-256 vault verification receipt:',
+                            title: 'Official Winner Code',
+                            message: 'Unique draw verification code for this winner:',
                             hash: win.verificationHash,
                           })}
                           className="font-mono text-[11px] bg-midnight-navy/5 px-2 py-1 rounded cursor-pointer hover:bg-midnight-navy/10 text-midnight-navy/70"
@@ -566,7 +566,7 @@ export const AdminDashboardPage: React.FC = () => {
                         <button 
                           onClick={() => setActionModal({ type: 'delete', id: reg.id, fullName: reg.fullName, ticketCount: reg.ticketCount })}
                           className="bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors inline-flex items-center gap-1"
-                          title="Permanently delete from database"
+                          title="Permanently delete this entry"
                         >
                           <TrashIcon size={13} />
                           <span>Delete</span>
@@ -796,17 +796,17 @@ export const AdminDashboardPage: React.FC = () => {
 
             <div className="mb-5">
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Audit Reason <span className="text-rose-500">*</span>
+                Quick Reason <span className="text-rose-500">*</span>
               </label>
               <textarea
                 value={voidReason}
                 onChange={e => setVoidReason(e.target.value)}
-                placeholder="Specify why this draw is voided (e.g. 'Participant absent during roll call', 'Disqualified per diocese regulations')"
+                placeholder="Write why we're redrawing (e.g. 'Winner wasn't around after 3 calls')"
                 className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs focus:outline-none focus:border-royal-blue h-24 resize-none"
                 required
               />
               <span className="text-[10px] text-slate-400 block mt-1">
-                Mandatory for cryptographic audit compliance (min. 5 characters).
+                Saved to our draw log so everything stays fair (at least 5 characters).
               </span>
             </div>
 
@@ -882,17 +882,17 @@ export const AdminDashboardPage: React.FC = () => {
             <p className="text-xs text-slate-600 mb-5 leading-relaxed">
               {actionModal.type === 'delete' && (
                 <span className="text-rose-700 font-medium">
-                  This action will permanently delete this registration and all associated tickets from the database. This cannot be undone.
+                  This will permanently remove this person&apos;s entry and tickets. You won&apos;t be able to undo this!
                 </span>
               )}
               {actionModal.type === 'approve' && (
                 <span>
-                  This will approve the payment, generate digital tickets in the vault, and send the confirmation email to the attendee.
+                  This confirms their payment, creates their digital tickets, and emails them right away.
                 </span>
               )}
               {actionModal.type === 'reject' && (
                 <span>
-                  This will reject the registration and remove any tickets from the active raffle pool.
+                  This marks their entry as rejected and removes their tickets from the draw.
                 </span>
               )}
             </p>
@@ -970,7 +970,7 @@ export const AdminDashboardPage: React.FC = () => {
                   }}
                   className="mt-2 text-xs font-bold text-royal-blue hover:underline inline-flex items-center gap-1"
                 >
-                  {copiedHash ? '✓ Copied to clipboard!' : 'Copy full hash to clipboard'}
+                  {copiedHash ? '✓ Copied!' : 'Copy winner code'}
                 </button>
               </div>
             )}
