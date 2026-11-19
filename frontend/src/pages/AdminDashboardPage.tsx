@@ -41,6 +41,7 @@ export const AdminDashboardPage: React.FC = () => {
     hash?: string;
   } | null>(null);
   const [isActionRunning, setIsActionRunning] = useState<boolean>(false);
+  const [isTestingEmail, setIsTestingEmail] = useState<boolean>(false);
   const [copiedHash, setCopiedHash] = useState<boolean>(false);
 
   const fetchWinners = useCallback(async () => {
@@ -274,6 +275,67 @@ export const AdminDashboardPage: React.FC = () => {
     }
   };
 
+  const handleTestEmail = async () => {
+    setIsTestingEmail(true);
+    try {
+      const res = await api.post<{
+        sent: boolean;
+        to?: string;
+        response?: string;
+        error?: string;
+        config?: {
+          host: string;
+          port: string;
+          user: string;
+          from: string;
+          frontendUrl: string;
+          passSet: boolean;
+          passLength: number;
+          hasQuotes: boolean;
+        };
+      }>('/admin/test-email', {});
+
+      if (!res.success || !res.data) {
+        setNoticeModal({
+          type: 'error',
+          title: 'Email Test Failed',
+          message: res.error || 'Could not reach the email test endpoint.',
+        });
+        return;
+      }
+
+      const cfg = res.data.config;
+      const cfgLines = cfg
+        ? [
+            `Host: ${cfg.host} (port ${cfg.port})`,
+            `User: ${cfg.user}`,
+            `From: ${cfg.from}`,
+            `Password set: ${cfg.passSet ? `yes (${cfg.passLength} chars)` : 'NO'}`,
+            cfg.hasQuotes ? 'WARNING: Quotes ("...") detected in env vars! Remove quotes in Vercel.' : null,
+            `Site URL: ${cfg.frontendUrl}`,
+          ]
+            .filter(Boolean)
+            .join('\n')
+        : '';
+
+      if (res.data.sent) {
+        setNoticeModal({
+          type: 'info',
+          title: 'Email Test Succeeded!',
+          message: `Test email sent to ${res.data.to}.\nGmail reply: ${res.data.response || '250 OK'}\n\n${cfgLines}`,
+        });
+      } else {
+        setNoticeModal({
+          type: 'error',
+          title: 'Email Failed on Live Server',
+          message: `Error: ${res.data.error || 'Unknown SMTP error'}\n\n${cfgLines}`,
+        });
+      }
+    } finally {
+      setIsTestingEmail(false);
+    }
+  };
+
   if (isAuthenticated === null || (loading && !data)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] text-midnight-navy">
@@ -293,6 +355,14 @@ export const AdminDashboardPage: React.FC = () => {
           <span className="font-heading font-semibold text-base sm:text-xl text-midnight-navy tracking-wide">DYD26 Admin</span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={handleTestEmail}
+            disabled={isTestingEmail}
+            className="text-xs font-semibold text-midnight-navy/80 bg-midnight-navy/5 hover:bg-midnight-navy/10 border border-midnight-navy/10 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full transition-colors disabled:opacity-50"
+          >
+            {isTestingEmail ? 'Testing...' : 'Test Email'}
+          </button>
           <a href="/live" className="text-xs font-bold text-royal-blue bg-royal-blue/10 hover:bg-royal-blue/20 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full transition-colors flex items-center gap-1.5">
             <CelebrationIcon size={14} />
             <span className="hidden sm:inline">Live Draw</span>
@@ -973,7 +1043,7 @@ export const AdminDashboardPage: React.FC = () => {
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+            <p className="text-xs text-slate-600 mb-3 leading-relaxed whitespace-pre-line">
               {noticeModal.message}
             </p>
 

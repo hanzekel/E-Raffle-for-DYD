@@ -19,6 +19,7 @@ import adminDeleteHandler from './_routes/admin/delete/[id]';
 import adminDrawHandler from './_routes/admin/draw';
 import adminVoidDrawHandler from './_routes/admin/void-draw';
 import adminWinnersHandler from './_routes/admin/winners';
+import adminTestEmailHandler from './_routes/admin/test-email';
 import raffleWinnersHandler from './_routes/raffle/winners';
 
 type RouteHandler = (req: VercelRequest, res: VercelResponse) => Promise<any> | any;
@@ -38,6 +39,7 @@ const STATIC_ROUTES: Record<string, RouteHandler> = {
   '/admin/draw': adminDrawHandler,
   '/admin/draw/void': adminVoidDrawHandler,
   '/admin/void-draw': adminVoidDrawHandler,
+  '/admin/test-email': adminTestEmailHandler,
   '/raffle/winners': raffleWinnersHandler,
 };
 
