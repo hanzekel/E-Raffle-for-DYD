@@ -2,14 +2,22 @@ import { z } from 'zod';
 import validator from 'validator';
 
 export const CAMP_NAMES = [
-  'Camp 1 - Manila',
-  'Camp 2 - Cavite',
-  'Camp 3 - Laguna',
-  'Camp 4 - Batangas',
-  'Camp 5 - Rizal',
-  'Camp 6 - Bulacan',
-  'Camp 7 - Pampanga',
-  'Camp 8 - Pangasinan',
+  'Bonifacio Naval Station',
+  'Bureau of Fire Protection - NCR',
+  'Bureau of Jail Management and Penology',
+  'General Headquarters, AFP',
+  'Camp Crame, PNP NHQ',
+  'Camp Panacan',
+  'Clark Air Base',
+  'Fernando Air Base',
+  'Army Fort Bonifacio',
+  'Heroesville',
+  'Naval Forces Central',
+  'Presidential Security Command',
+  'Shrine of St. Therese',
+  'Southern Police District',
+  'Visayas Command, AFP',
+  'Philippine National Police',
   'Other',
 ];
 

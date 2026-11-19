@@ -13,7 +13,10 @@ export const RegisterPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const prefillName = searchParams.get('name') || '';
   const prefillCamp = searchParams.get('camp') || '';
-  
+
+  const presetCamps = config.campNames.filter((c) => c !== 'Other');
+  const isPrefillCustom = prefillCamp !== '' && !presetCamps.includes(prefillCamp);
+
   const [formData, setFormData] = useState<RegistrationFormData>({
     fullName: prefillName,
     email: '',
@@ -21,9 +24,10 @@ export const RegisterPage: React.FC = () => {
     campName: prefillCamp,
     ticketCount: 1,
   });
-  
+
   const [errors, setErrors] = useState<Partial<Record<keyof RegistrationFormData, string>>>({});
-  const [customCamp, setCustomCamp] = useState('');
+  const [customCamp, setCustomCamp] = useState(isPrefillCustom ? prefillCamp : '');
+  const [isOtherSelected, setIsOtherSelected] = useState(isPrefillCustom);
   const [showSummary, setShowSummary] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -34,28 +38,31 @@ export const RegisterPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     let finalValue: any = value;
-    
+
     if (name === 'ticketCount') {
       finalValue = parseInt(value, 10) || 1;
     }
 
     setFormData(prev => ({ ...prev, [name]: finalValue }));
-    
+
     const err = validateField(registrationSchema, name, finalValue);
-    setErrors(prev => ({ ...prev, [name]: err }));
+    setErrors(prev => ({ ...prev, [name]: err || undefined }));
   };
 
   const handleCustomCampChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomCamp(e.target.value);
-    setFormData(prev => ({ ...prev, campName: e.target.value }));
+    const val = e.target.value;
+    setCustomCamp(val);
+    setFormData(prev => ({ ...prev, campName: val }));
+    const err = validateField(registrationSchema, 'campName', val);
+    setErrors(prev => ({ ...prev, campName: err || undefined }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const sanitized = sanitizeFormData(formData);
     const result = registrationSchema.safeParse(sanitized);
-    
+
     if (!result.success) {
       const newErrors: any = {};
       result.error.errors.forEach(err => {
@@ -73,10 +80,10 @@ export const RegisterPage: React.FC = () => {
         setFormData(sanitized);
         setShowSummary(true);
       } else {
-        setSubmitError(res.error || 'Registration failed. Please check your inputs.');
+        setSubmitError(res.error || 'Something did not look right—please check your details.');
       }
-    } catch (err) {
-      setSubmitError('Unable to connect to the server. Please check your internet connection.');
+    } catch {
+      setSubmitError('Having trouble connecting right now. Check your internet and try again!');
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +95,7 @@ export const RegisterPage: React.FC = () => {
   };
 
   const totalAmount = formData.ticketCount * config.ticketPrice;
-  const isOtherCamp = formData.campName !== '' && !config.campNames.includes(formData.campName);
+  const isOtherCamp = isOtherSelected || (formData.campName !== '' && !presetCamps.includes(formData.campName));
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-5 sm:py-8 max-w-xl animate-appear">
@@ -97,9 +104,9 @@ export const RegisterPage: React.FC = () => {
           <span className="text-sm font-medium text-midnight-navy/80">Step 1 of 2</span>
         </div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold gradient-text leading-tight sm:leading-snug mb-1 sm:mb-2 py-1">Raffle Registration</h1>
-        <p className="text-midnight-navy/60">Secure your tickets for the DYD 2026</p>
+        <p className="text-midnight-navy/60">Grab your tickets for DYD 2026</p>
       </div>
-      
+
       <div className="card">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -122,31 +129,33 @@ export const RegisterPage: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium mb-2 text-midnight-navy/70">Camp Name</label>
-            <select 
-              name="campName" 
-              value={isOtherCamp ? 'Other' : formData.campName} 
+            <select
+              name="campName"
+              value={isOtherCamp ? 'Other' : formData.campName}
               onChange={(e) => {
                 if (e.target.value === 'Other') {
+                  setIsOtherSelected(true);
                   setFormData(prev => ({ ...prev, campName: customCamp }));
                 } else {
+                  setIsOtherSelected(false);
                   handleChange(e);
                 }
-              }} 
+              }}
               className="input-field bg-midnight-navy/10"
             >
               <option value="">Select Camp</option>
-              {config.campNames.map(camp => (
+              {presetCamps.map(camp => (
                 <option key={camp} value={camp}>{camp}</option>
               ))}
               <option value="Other">Other</option>
             </select>
             {isOtherCamp && (
-              <input 
-                type="text" 
-                value={customCamp} 
-                onChange={handleCustomCampChange} 
-                className="input-field mt-3 animate-appear-zoom" 
-                placeholder="Enter Camp Name" 
+              <input
+                type="text"
+                value={customCamp}
+                onChange={handleCustomCampChange}
+                className="input-field mt-3 animate-appear-zoom"
+                placeholder="Enter your Parish or Camp Name"
               />
             )}
             {errors.campName && <p className="text-highlight-red text-sm mt-1">{errors.campName}</p>}
@@ -173,7 +182,7 @@ export const RegisterPage: React.FC = () => {
           )}
 
           <button type="submit" className="w-full btn-primary text-lg mt-4" disabled={isSubmitting}>
-            {isSubmitting ? 'Validating...' : 'Review Registration'}
+            {isSubmitting ? 'Checking details...' : 'Review Registration'}
           </button>
         </form>
       </div>
@@ -182,7 +191,7 @@ export const RegisterPage: React.FC = () => {
         <div className="fixed inset-0 bg-midnight-navy/10 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-appear">
           <div className="card max-w-md w-full relative">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-radial-gradient from-gold/10 to-transparent opacity-50 blur-3xl pointer-events-none"></div>
-            
+
             <h2 className="text-2xl font-semibold mb-6 text-center text-midnight-navy border-b border-midnight-navy/5 pb-4">Order Summary</h2>
             <div className="space-y-4 mb-8 relative z-10">
               <div className="flex justify-between border-b border-midnight-navy/5 pb-3">
@@ -216,4 +225,3 @@ export const RegisterPage: React.FC = () => {
     </div>
   );
 };
-
