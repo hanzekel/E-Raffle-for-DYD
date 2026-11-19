@@ -5,7 +5,7 @@ export const registrationSchema = z.object({
   email: z.string().email('Invalid email address'),
   contactNumber: z.string().regex(/^09\d{9}$/, 'Must be a valid Philippine mobile number (e.g., 09123456789)'),
   campName: z.string().min(1, 'Camp name is required'),
-  ticketCount: z.number().min(1, 'At least 1 ticket required').max(100, 'Maximum limit reached'),
+  ticketCount: z.number().min(1, 'At least 1 ticket required').max(10, 'Maximum 10 tickets per registration'),
 });
 
 export const paymentSchema = z.object({
