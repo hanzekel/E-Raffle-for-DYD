@@ -95,15 +95,24 @@ export const AdminDashboardPage: React.FC = () => {
 
     try {
       if (actionModal.type === 'approve') {
-        const res = await api.post(`/admin/approve/${actionModal.id}`, {});
+        const res = await api.post<{ ticketsGenerated: number; emailSent?: boolean; emailError?: string }>(`/admin/approve/${actionModal.id}`, {});
         if (res.success) {
+          const fullName = actionModal.fullName;
           setActionModal(null);
           await fetchDashboard(false);
+
+          if (res.data?.emailSent === false) {
+            setNoticeModal({
+              type: 'info',
+              title: 'Approved (Email Did Not Send)',
+              message: `${fullName}'s tickets were created and approved, but the email did not go through (${res.data.emailError || 'Gmail login rejected'}). Update your Gmail App Password in Vercel to enable emails.`,
+            });
+          }
         } else {
           setNoticeModal({
             type: 'error',
-            title: 'Approval Failed',
-            message: res.error || 'Failed to approve registration. Please verify payment status.',
+            title: 'Could Not Approve',
+            message: res.error || 'Could not approve this entry right now. Please try again.',
           });
         }
       } else if (actionModal.type === 'reject') {
@@ -114,17 +123,30 @@ export const AdminDashboardPage: React.FC = () => {
         } else {
           setNoticeModal({
             type: 'error',
-            title: 'Rejection Failed',
-            message: res.error || 'Failed to reject registration. Please try again.',
+            title: 'Could Not Reject',
+            message: res.error || 'Could not reject this entry right now. Please try again.',
           });
         }
       } else if (actionModal.type === 'delete') {
-        // Direct database deletion with NO reason option required
-        const res = await api.post(`/admin/delete/${actionModal.id}`, {});
+        const targetId = actionModal.id;
+        const res = await api.post(`/admin/delete/${targetId}`, {});
         if (res.success) {
+          // Optimistically drop deleted row and refresh dashboard/winners concurrently in background
           setActionModal(null);
-          await fetchDashboard(false);
-          await fetchWinners();
+          setData((prev) => {
+            if (!prev) return prev;
+            const removed = prev.registrations.find((r) => r.id === targetId);
+            return {
+              ...prev,
+              registrations: prev.registrations.filter((r) => r.id !== targetId),
+              total: Math.max(0, prev.total - 1),
+              pendingCount: removed?.status === 'pending' ? Math.max(0, prev.pendingCount - 1) : prev.pendingCount,
+              approvedCount: removed?.status === 'approved' ? Math.max(0, prev.approvedCount - 1) : prev.approvedCount,
+              rejectedCount: removed?.status === 'rejected' ? Math.max(0, prev.rejectedCount - 1) : prev.rejectedCount,
+              eligibleEntries: removed?.status === 'approved' ? Math.max(0, prev.eligibleEntries - removed.ticketCount) : prev.eligibleEntries,
+            };
+          });
+          void Promise.all([fetchDashboard(false), fetchWinners()]);
         } else {
           setNoticeModal({
             type: 'error',

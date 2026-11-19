@@ -37,6 +37,32 @@ export async function getSignedUrl(bucket: string, filePath: string, expiresIn: 
   return data.signedUrl;
 }
 
+// Fetch all signed URLs in one batch HTTP call instead of N separate requests
+export async function getSignedUrlsBatch(
+  bucket: string,
+  filePaths: string[],
+  expiresIn: number = 3600
+): Promise<Record<string, string>> {
+  const uniquePaths = Array.from(new Set(filePaths.filter(Boolean)));
+  if (uniquePaths.length === 0) return {};
+
+  const supabase = createSupabaseAdmin();
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrls(uniquePaths, expiresIn);
+
+  if (error || !data) {
+    console.warn('Batch signed URL generation failed:', error?.message);
+    return {};
+  }
+
+  const map: Record<string, string> = {};
+  for (const item of data) {
+    if (item.path && item.signedUrl) {
+      map[item.path] = item.signedUrl;
+    }
+  }
+  return map;
+}
+
 export async function createSignedUploadUrl(bucket: string, filePath: string): Promise<{ signedUrl: string, path: string, token: string }> {
   const supabase = createSupabaseAdmin();
   const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(filePath);

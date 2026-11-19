@@ -2,6 +2,7 @@ import { withMiddleware } from '../_lib/middleware';
 import { registrationSchema, paymentSchema } from '../_lib/validation';
 import { ApiError } from '../_lib/errors';
 import { prisma } from '../_lib/prisma';
+import { sendSubmissionConfirmationEmail } from '../_lib/email';
 
 const fullSchema = registrationSchema.and(paymentSchema);
 
@@ -42,10 +43,27 @@ async function handler(req: any, res: any) {
     },
   });
 
+  // Send non-blocking submission receipt email so valid registrations never fail on SMTP
+  let emailSent = false;
+  try {
+    await sendSubmissionConfirmationEmail({
+      id: registration.id,
+      fullName: registration.fullName,
+      email: registration.email,
+      ticketCount: registration.ticketCount,
+      totalAmount,
+      referenceNumber: registration.referenceNumber,
+    });
+    emailSent = true;
+  } catch (err) {
+    console.warn('Submission confirmation email failed:', (err as any)?.message || err);
+  }
+
   return res.status(200).json({
     success: true,
     data: {
       registrationId: registration.id,
+      emailSent,
     },
   });
 }

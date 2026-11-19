@@ -26,20 +26,26 @@ async function handler(req: any, res: any) {
     data: { status: 'approved' },
   });
 
+  let emailSent = false;
+  let emailError: string | undefined;
+
   try {
     await sendApprovalEmail(
       { fullName: registration.fullName, email: registration.email, ticketCount: registration.ticketCount },
       pdfBuffers
     );
-  } catch (error) {
-    console.error('Failed to send approval email', error);
-    // Continue despite email failure as tickets are already generated
+    emailSent = true;
+  } catch (error: any) {
+    console.error('Failed to send approval email:', error);
+    emailError = error?.message || 'Email server rejected login credentials';
   }
 
   return res.status(200).json({
     success: true,
     data: {
       ticketsGenerated: tickets.length,
+      emailSent,
+      emailError,
     },
   });
 }
