@@ -22,7 +22,11 @@ async function handler(req: any, res: any) {
   });
 
   if (existing) {
-    throw new ApiError(409, 'Reference number already exists in our system', 'DUPLICATE_REFERENCE');
+    throw new ApiError(
+      409,
+      `Reference number "${data.referenceNumber}" already exists in our system. Please check and enter the new Reference Number from your GCash receipt.`,
+      'DUPLICATE_REFERENCE',
+    );
   }
 
   const TICKET_PRICE = Number(process.env.TICKET_PRICE || '100');

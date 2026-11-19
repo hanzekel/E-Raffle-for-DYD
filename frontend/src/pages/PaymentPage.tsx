@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConfig } from '../hooks/useConfig';
 import { api } from '../lib/api';
 import { RegistrationFormData } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { GcashQR } from '../components/GcashQR';
-import { AlertTriangleIcon, CheckIcon } from '../components/icons/Icons';
+import { AlertTriangleIcon, CheckIcon, TrashIcon } from '../components/icons/Icons';
 import { validateReceiptImage } from '../lib/receiptValidator';
 
 export const PaymentPage: React.FC = () => {
   const { config, loading } = useConfig();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [registrationData, setRegistrationData] = useState<RegistrationFormData | null>(null);
   const [referenceNumber, setReferenceNumber] = useState('');
@@ -31,10 +32,26 @@ export const PaymentPage: React.FC = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
   if (!registrationData) return <LoadingSpinner message="Preparing payment..." />;
   if (loading && !config) return <LoadingSpinner message="Loading payment details..." />;
 
   const totalAmount = registrationData.ticketCount * config.ticketPrice;
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    setPreview(null);
+    setIsReceiptVerified(false);
+    setFormError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormError('');
@@ -80,7 +97,8 @@ export const PaymentPage: React.FC = () => {
     e.preventDefault();
     setFormError('');
 
-    if (!referenceNumber.match(/^[a-zA-Z0-9]{8,30}$/)) {
+    const normalizedRef = referenceNumber.trim().toUpperCase();
+    if (!normalizedRef.match(/^[A-Z0-9]{8,30}$/)) {
       setFormError('Double-check your reference number—it should be 8 to 30 letters or numbers.');
       return;
     }
@@ -118,7 +136,7 @@ export const PaymentPage: React.FC = () => {
       const finalRes = await api.post<{ registrationId: string }>('/payment', {
         ...registrationData,
         paymentMethod: 'gcash',
-        referenceNumber,
+        referenceNumber: normalizedRef,
         proofOfPaymentPath: uploadRes.data.filePath,
       });
 
@@ -198,7 +216,7 @@ export const PaymentPage: React.FC = () => {
               type="text" 
               value={referenceNumber}
               onChange={(e) => {
-                setReferenceNumber(e.target.value);
+                setReferenceNumber(e.target.value.toUpperCase());
                 setFormError('');
               }}
               className="input-field uppercase" 
@@ -224,6 +242,7 @@ export const PaymentPage: React.FC = () => {
             </div>
             <div className="relative">
               <input 
+                ref={fileInputRef}
                 type="file" 
                 accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileChange}
@@ -239,7 +258,7 @@ export const PaymentPage: React.FC = () => {
             {preview && isReceiptVerified && (
               <div className="mt-4 p-3 bg-emerald-50/60 rounded-2xl border border-emerald-200/80 animate-appear-zoom flex flex-col sm:flex-row items-center gap-3">
                 <img src={preview} alt="Proof preview" className="max-h-36 max-w-[120px] rounded-lg shadow-sm border border-emerald-200 object-cover" />
-                <div className="text-left space-y-1">
+                <div className="text-left space-y-1 flex-1">
                   <div className="flex items-center gap-1.5 text-emerald-700 text-xs font-bold">
                     <CheckIcon size={16} className="text-emerald-600" />
                     <span>Receipt looks good!</span>
@@ -248,6 +267,16 @@ export const PaymentPage: React.FC = () => {
                     Your GCash screenshot is clear and ready to send.
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  disabled={isSubmitting}
+                  aria-label="Remove uploaded receipt"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 bg-white hover:bg-rose-50 border border-rose-200 transition-colors shrink-0 disabled:opacity-50"
+                >
+                  <TrashIcon size={13} />
+                  <span>Remove</span>
+                </button>
               </div>
             )}
           </div>
