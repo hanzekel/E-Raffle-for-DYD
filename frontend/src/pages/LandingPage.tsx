@@ -94,7 +94,7 @@ export const LandingPage: React.FC = () => {
                 Your Ticket. <span className="text-gold">Their Mission.</span> One Grand Day.
               </h1>
               <p className="text-slate-200 text-xs sm:text-sm leading-relaxed max-w-xl mb-4 sm:mb-5">
-                Secure your official Diocesan Youth Day 2026 raffle entries online. Instant verified digital ticket, GCash & Bank integration, and live public draw.
+                Secure your official Diocesan Youth Day 2026 raffle entries online. Instant verified digital ticket, GCash payment integration, and live public draw.
               </p>
 
               {/* Action Buttons */}

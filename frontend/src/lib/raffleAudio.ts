@@ -155,6 +155,34 @@ class RaffleAudioController {
       osc.stop(now + idx * 0.1 + 1.5);
     });
   }
+
+  // Crisp mechanical click tick as the selector scans over candidate tickets
+  public playTick(pitchOffset: number = 0) {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(Math.max(420, 880 - pitchOffset), now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.035);
+
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.045);
+    } catch {
+      // Safe fallback
+    }
+  }
 }
 
 export const raffleAudio = new RaffleAudioController();

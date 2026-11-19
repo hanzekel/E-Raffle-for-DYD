@@ -13,7 +13,6 @@ export const PaymentPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [registrationData, setRegistrationData] = useState<RegistrationFormData | null>(null);
-  const [activeTab, setActiveTab] = useState<'gcash' | 'bank'>('gcash');
   const [referenceNumber, setReferenceNumber] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -118,7 +117,7 @@ export const PaymentPage: React.FC = () => {
       setProgressMsg('Securing your tickets...');
       const finalRes = await api.post<{ registrationId: string }>('/payment', {
         ...registrationData,
-        paymentMethod: activeTab,
+        paymentMethod: 'gcash',
         referenceNumber,
         proofOfPaymentPath: uploadRes.data.filePath,
       });
@@ -171,59 +170,24 @@ export const PaymentPage: React.FC = () => {
       </div>
 
       <div className="card">
-        {/* Tab Segment Control */}
-        <div className="flex p-1 mb-8 bg-midnight-navy/5 rounded-xl border border-midnight-navy/10">
-          <button 
-            type="button"
-            className={`flex-1 py-3 text-center text-sm font-semibold rounded-lg transition-all ${
-              activeTab === 'gcash'
-                ? 'bg-midnight-navy/10 text-gold shadow-sm font-bold'
-                : 'text-midnight-navy/50 hover:text-midnight-navy/80'
-            }`}
-            onClick={() => setActiveTab('gcash')}
-          >
-            GCash
-          </button>
-          <button 
-            type="button"
-            className={`flex-1 py-3 text-center text-sm font-semibold rounded-lg transition-all ${
-              activeTab === 'bank'
-                ? 'bg-midnight-navy/10 text-gold shadow-sm font-bold'
-                : 'text-midnight-navy/50 hover:text-midnight-navy/80'
-            }`}
-            onClick={() => setActiveTab('bank')}
-          >
-            Bank Transfer
-          </button>
+        {/* GCash Only Payment Header */}
+        <div className="flex items-center justify-center gap-2 mb-6 py-2.5 px-4 bg-[#007DFE]/10 rounded-xl border border-[#007DFE]/20">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#007DFE]" />
+          <span className="text-sm font-bold text-[#007DFE] tracking-wide uppercase">
+            GCash Payment Only
+          </span>
         </div>
 
-        {activeTab === 'gcash' && (
-          <div className="animate-appear-zoom mb-8 text-center">
-            <GcashQR />
-            <div className="bg-midnight-navy/[0.02] border border-midnight-navy/[0.05] p-6 rounded-xl inline-block mt-6">
-              <p className="text-sm text-midnight-navy/50 mb-2">Send payment to GCash:</p>
-              <p className="font-semibold text-2xl tracking-wider text-midnight-navy/90 mb-1">
-                {config.gcashNumber}
-              </p>
-              <p className="text-midnight-navy/60">{config.gcashName}</p>
-            </div>
+        <div className="animate-appear-zoom mb-8 text-center">
+          <GcashQR />
+          <div className="bg-midnight-navy/[0.02] border border-midnight-navy/[0.05] p-6 rounded-xl block max-w-sm mx-auto mt-6">
+            <p className="text-sm text-midnight-navy/50 mb-2">Or send directly to GCash:</p>
+            <p className="font-semibold text-2xl tracking-wider text-midnight-navy/90 mb-1">
+              {config.gcashNumber}
+            </p>
+            <p className="text-midnight-navy/60 font-medium">{config.gcashName}</p>
           </div>
-        )}
-
-        {activeTab === 'bank' && (
-          <div className="animate-appear-zoom mb-8">
-            <div className="bg-midnight-navy/[0.02] p-8 rounded-xl border border-midnight-navy/[0.05] text-center max-w-md mx-auto">
-              <p className="text-sm text-midnight-navy/50 mb-1">Bank Name</p>
-              <p className="font-semibold text-xl mb-6 text-midnight-navy/90">{config.bankName}</p>
-              
-              <p className="text-sm text-midnight-navy/50 mb-1">Account Number</p>
-              <p className="font-semibold text-2xl mb-6 tracking-widest text-gold">{config.bankAccountNumber}</p>
-              
-              <p className="text-sm text-midnight-navy/50 mb-1">Account Name</p>
-              <p className="font-medium text-lg text-midnight-navy/80">{config.bankAccountName}</p>
-            </div>
-          </div>
-        )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 border-t border-midnight-navy/5 pt-8">
           <div>
@@ -242,7 +206,7 @@ export const PaymentPage: React.FC = () => {
               required 
             />
             <p className="text-[11px] text-slate-400 mt-1.5">
-              Found on your GCash or Bank receipt (8 to 30 characters).
+              Found on your GCash receipt (8 to 30 characters).
             </p>
           </div>
 
@@ -269,7 +233,7 @@ export const PaymentPage: React.FC = () => {
               />
             </div>
             <p className="text-[11px] text-slate-400 mt-1.5">
-              Attach an official screenshot of your GCash, Maya, or Bank confirmation slip. Blank or non-transaction images will not be accepted.
+              Attach an official screenshot of your GCash transaction receipt. Blank or non-transaction images will not be accepted.
             </p>
 
             {preview && isReceiptVerified && (

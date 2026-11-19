@@ -124,7 +124,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
     if (stdDev < 12 || colorBuckets.size < 10) {
       return {
         isValid: false,
-        error: 'The uploaded image appears to be blank or a solid color. Please upload your actual GCash or bank transfer confirmation receipt.',
+        error: 'The uploaded image appears to be blank or a solid color. Please upload your actual GCash confirmation receipt.',
         metrics: { width: w, height: h, stdDev, edgeDensity: 0 },
       };
     }
@@ -154,7 +154,7 @@ export async function validateReceiptImage(file: File): Promise<ReceiptValidatio
     if (edgeDensity < 1.4) {
       return {
         isValid: false,
-        error: 'Image does not appear to contain legible transaction details or receipt structure. Please upload a clear screenshot of your GCash, Maya, or bank transfer receipt.',
+        error: 'Image does not appear to contain legible transaction details or receipt structure. Please upload a clear screenshot of your GCash transaction receipt.',
         metrics: { width: w, height: h, stdDev, edgeDensity },
       };
     }

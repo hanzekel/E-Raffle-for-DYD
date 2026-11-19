@@ -9,7 +9,7 @@ export const registrationSchema = z.object({
 });
 
 export const paymentSchema = z.object({
-  paymentMethod: z.enum(['gcash', 'bank']),
+  paymentMethod: z.enum(['gcash']),
   referenceNumber: z.string().regex(/^[a-zA-Z0-9]{8,30}$/, 'Reference number must be 8-30 alphanumeric characters'),
   proofOfPaymentPath: z.string().min(1, 'Proof of payment is required'),
 });

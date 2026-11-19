@@ -89,30 +89,12 @@ async function handler(req: any, res: any) {
   } catch (err: any) {
     if (err instanceof ApiError) throw err;
 
-    console.warn('Database error during draw, utilizing simulated fallback vault for testing:', err);
-    // Fallback simulated draw for testing environments
-    const mockTicketNumber = `DYD26-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    const drawnAt = new Date();
-    const verificationHash = crypto
-      .createHash('sha256')
-      .update(`${mockTicketNumber}:${prizeName}:${drawnAt.toISOString()}`)
-      .digest('hex');
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        id: `simulated-winner-${Date.now()}`,
-        ticketNumber: mockTicketNumber,
-        prizeName,
-        drawnAt,
-        verificationHash,
-        registration: {
-          fullName: `Verified Participant ${crypto.randomInt(10, 99)}`,
-          campName: 'Camp 1 - Manila',
-        },
-        totalEligiblePool: 50,
-      },
-    });
+    console.error('Database error during draw:', err);
+    throw new ApiError(
+      500,
+      'Unable to reach the raffle vault database. Draw aborted to protect draw integrity.',
+      'VAULT_DB_ERROR'
+    );
   }
 }
 

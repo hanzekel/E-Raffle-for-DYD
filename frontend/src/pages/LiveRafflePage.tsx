@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { LockIcon, ShieldIcon, DiceIcon, TicketIcon, ExpandIcon, CompressIcon } from '../components/icons/Icons';
 import { EligiblePoolTicket } from '../types';
-import { FlyingTicketsVortex } from '../components/FlyingTicketsVortex';
+import { FlyingTicketsVortex, DrawPhase } from '../components/FlyingTicketsVortex';
 import { WinningTicketCard } from '../components/WinningTicketCard';
 
 const PRESET_PRIZES = [
@@ -25,6 +25,8 @@ export const LiveRafflePage: React.FC = () => {
   const [tickets, setTickets] = useState<EligiblePoolTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [isShuffling, setIsShuffling] = useState(false);
+  const [drawPhase, setDrawPhase] = useState<DrawPhase>('idle');
+  const [pendingWinner, setPendingWinner] = useState<any | null>(null);
   const [winner, setWinner] = useState<any | null>(null);
   const [selectedPrize, setSelectedPrize] = useState<string>(PRESET_PRIZES[0]);
   const [customPrize, setCustomPrize] = useState<string>('');
@@ -92,7 +94,7 @@ export const LiveRafflePage: React.FC = () => {
     }
   };
 
-  // Server-side cryptographic draw execution
+  // Server-side cryptographic draw execution synced with 1:1 visual extraction
   const executeServerDraw = async () => {
     const prize = customPrize.trim() || selectedPrize;
     if (!prize) {
@@ -100,26 +102,41 @@ export const LiveRafflePage: React.FC = () => {
       return;
     }
 
+    if (tickets.length === 0) {
+      setErrorMsg('No verified tickets in pool yet. Approve at least 1 registration first.');
+      return;
+    }
+
     setErrorMsg('');
     setIsShuffling(true);
+    setPendingWinner(null);
     setWinner(null);
+    setDrawPhase('mixing');
 
     try {
-      // Trigger server CSPRNG draw in backend vault
+      // Phase 1: Mix real tickets in wind vortex while server runs crypto.randomInt
       const drawPromise = api.post<any>('/admin/draw', { prizeName: prize });
-      
-      // Minimum 3.5 seconds of suspense animation for audience
-      const delayPromise = new Promise(resolve => setTimeout(resolve, 3500));
-      
-      const [res] = await Promise.all([drawPromise, delayPromise]);
+      const mixDelay = new Promise((resolve) => setTimeout(resolve, 2000));
+      const [res] = await Promise.all([drawPromise, mixDelay]);
 
-      if (res.success && res.data) {
-        setWinner(res.data);
-        fetchTickets(); // Refresh remaining tickets in pool
-      } else {
+      if (!res.success || !res.data) {
         throw new Error((res.error as any)?.message || res.error || 'Failed to complete server draw');
       }
+
+      // Phase 2: Decelerating spotlight scan + pull the exact CSPRNG chosen ticket out
+      setPendingWinner(res.data);
+      setDrawPhase('selecting');
+
+      const scanDuration = tickets.length <= 1 ? 1100 : 3500;
+      await new Promise((resolve) => setTimeout(resolve, scanDuration));
+
+      // Phase 3: Official ticket reveal + confetti + refresh remaining vault pool
+      setDrawPhase('revealed');
+      setWinner(res.data);
+      fetchTickets();
     } catch (err: any) {
+      setDrawPhase('idle');
+      setPendingWinner(null);
       setErrorMsg(err.message || 'Error occurred during draw');
     } finally {
       setIsShuffling(false);
@@ -147,7 +164,9 @@ export const LiveRafflePage: React.FC = () => {
       if (res.success) {
         setStageVoidOpen(false);
         setStageVoidReason('');
+        setPendingWinner(null);
         setWinner(null);
+        setDrawPhase('idle');
         await fetchTickets();
 
         if (shouldImmediateRedraw) {
@@ -333,7 +352,8 @@ export const LiveRafflePage: React.FC = () => {
       <div className="relative z-10 w-full max-w-2xl flex flex-col items-center mb-6">
         <FlyingTicketsVortex
           tickets={tickets}
-          isShuffling={isShuffling}
+          drawPhase={drawPhase}
+          pendingWinner={pendingWinner}
           winner={winner}
           className="w-full"
         />
@@ -355,7 +375,11 @@ export const LiveRafflePage: React.FC = () => {
             {isOperatorActive && (
               <div className="flex justify-center gap-3 pt-1">
                 <button
-                  onClick={() => setWinner(null)}
+                  onClick={() => {
+                    setWinner(null);
+                    setPendingWinner(null);
+                    setDrawPhase('idle');
+                  }}
                   className="px-4 py-2 rounded-xl bg-royal-blue hover:bg-royal-blue-dark text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
                 >
                   <span>Draw Next Prize &rarr;</span>
@@ -496,7 +520,8 @@ export const LiveRafflePage: React.FC = () => {
             {/* 3D Flying Chamber */}
             <FlyingTicketsVortex
               tickets={tickets}
-              isShuffling={isShuffling}
+              drawPhase={drawPhase}
+              pendingWinner={pendingWinner}
               winner={winner}
               className="w-full max-w-3xl"
             />
