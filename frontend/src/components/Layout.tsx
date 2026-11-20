@@ -5,7 +5,6 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Logo } from './Logo';
 import { useAuth } from '../hooks/useAuth';
 import { ShieldIcon } from './icons/Icons';
-import { ChristmasCornerRibbons } from './FilipinoMotifs';
 
 export const Layout: React.FC = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,9 +16,6 @@ export const Layout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]/30 text-midnight-navy relative z-10">
       <header className="fixed top-0 left-0 right-0 h-14 bg-white/85 backdrop-blur-xl z-50 border-b border-midnight-navy/10 flex items-center justify-between px-3 md:px-8 shadow-sm">
-        {/* Curved 3D Christmas satin ribbon wrapping the DYD 2026 header corners on main page */}
-        {location.pathname === '/' && <ChristmasCornerRibbons size="sm" showBottomRight />}
-
         <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group relative z-10">
           <Logo size={36} />
           <div className="leading-tight">
