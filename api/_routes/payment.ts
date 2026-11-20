@@ -29,7 +29,7 @@ async function handler(req: any, res: any) {
     );
   }
 
-  const TICKET_PRICE = Number(process.env.TICKET_PRICE || '100');
+  const TICKET_PRICE = Number(process.env.TICKET_PRICE || '20');
   const totalAmount = data.ticketCount * TICKET_PRICE;
 
   const registration = await prisma.registration.create({

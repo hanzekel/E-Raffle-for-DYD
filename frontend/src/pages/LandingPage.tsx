@@ -11,6 +11,7 @@ import {
   CelebrationIcon,
   SparklesIcon,
 } from '../components/icons/Icons';
+import { PrizeShowcase } from '../components/PrizeShowcase';
 
 export const LandingPage: React.FC = () => {
   const { config } = useConfig();
@@ -72,7 +73,7 @@ export const LandingPage: React.FC = () => {
             {typeof config?.eligibleEntries === 'number' ? `${config.eligibleEntries} Tickets In The Draw` : '40 Years in Mission'}
           </span>
           <span className="text-[11px] sm:text-xs font-bold text-gold bg-midnight-navy px-2.5 sm:px-3 py-1 rounded-full">
-            ₱{config?.ticketPrice || 100} / Entry
+            ₱{config?.ticketPrice || 20} / Entry
           </span>
         </div>
       </div>
@@ -94,7 +95,7 @@ export const LandingPage: React.FC = () => {
                 Your Ticket. <span className="text-gold">Their Mission.</span> One Grand Day.
               </h1>
               <p className="text-slate-200 text-xs sm:text-sm leading-relaxed max-w-xl mb-4 sm:mb-5">
-                Grab your official Diocesan Youth Day 2026 raffle tickets online! Quick GCash checkout, instant e-tickets, and a real live stage draw.
+                Grab your official Diocesan Youth Day 2026 raffle tickets online for only ₱{config?.ticketPrice || 20} each—get more tickets for even more chances of winning!
               </p>
 
               {/* Action Buttons */}
@@ -103,7 +104,7 @@ export const LandingPage: React.FC = () => {
                   to={getRegisterLink()}
                   className="bg-gold hover:bg-gold-light text-midnight-navy font-black px-6 py-2.5 sm:px-7 sm:py-3 rounded-full text-xs sm:text-sm transition-all shadow-md text-center active:scale-95"
                 >
-                  Get E-Tickets &bull; ₱{config?.ticketPrice || 100}
+                  Get E-Tickets &bull; ₱{config?.ticketPrice || 20}
                 </Link>
                 <Link
                   to="/verify"
@@ -161,7 +162,7 @@ export const LandingPage: React.FC = () => {
           <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-dashed border-slate-300 shadow-inner relative font-mono text-xs mb-2.5 sm:mb-3">
             <div className="flex justify-between items-center pb-2 border-b border-slate-200">
               <span className="font-bold text-royal-blue">MOPCY-DYD26-PASS</span>
-              <span className="text-gold font-extrabold">₱{config?.ticketPrice || 100}.00</span>
+              <span className="text-gold font-extrabold">₱{config?.ticketPrice || 20}.00</span>
             </div>
             <div className="py-2.5 text-[11px] text-slate-700 space-y-1">
               <p>
@@ -258,40 +259,42 @@ export const LandingPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Bento Box 4: Mystery Grand Prizes Teaser (Prizes TBA) */}
+        {/* Bento Box 4: Official Prizes Quick Card */}
         <div className="md:col-span-2 lg:col-span-1 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-900 to-midnight-navy text-white p-4 sm:p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold/15 rounded-full blur-2xl pointer-events-none" />
 
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-gold bg-white/10 px-2.5 py-0.5 rounded-full">
-                Grand Rewards
+                Official Prizes
               </span>
               <span className="text-gold bg-white/10 p-2 rounded-xl flex items-center justify-center">
                 <GiftIcon size={20} />
               </span>
             </div>
 
-            <h3 className="font-heading font-bold text-lg text-white mb-2 flex items-center gap-2">
-              <span>Prizes Under Wraps</span>
-              <LockIcon size={16} className="text-gold" />
+            <h3 className="font-heading font-bold text-lg text-white mb-2">
+              Major &amp; Minor Rewards
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              Big prizes are locked in and dropping soon! Watch our official socials for the full reveal.
+              Win Powerbanks, Jisulife Turbo Fans, Aquaflask Tumblers, Starbucks Gift Cards, Earbuds, and Official Merch!
             </p>
           </div>
 
-          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-gold font-semibold">
-            <span>Multiple Cash & Major Draws</span>
-            <span>Stay Tuned &bull; 2026</span>
-          </div>
+          <a
+            href="#prizes"
+            className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-gold hover:text-gold-light font-semibold transition-colors"
+          >
+            <span>See All Prizes Below</span>
+            <span>&darr;</span>
+          </a>
         </div>
 
-        {/* Bento Box 5: Where ₱100 Goes (Mission Impact) */}
+        {/* Bento Box 5: Where Your Entry Goes (Mission Impact) */}
         <div className="md:col-span-2 lg:col-span-2 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 p-4 sm:p-6 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-heading font-bold text-base text-slate-900">
-              Where Your ₱100 Goes
+              Where Your ₱{config?.ticketPrice || 20} Goes
             </h3>
             <span className="text-xs font-bold text-royal-blue bg-royal-blue/10 px-3 py-1 rounded-full">
               Mission Transparency
@@ -357,6 +360,9 @@ export const LandingPage: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {/* Visual Major & Minor Prizes Showcase */}
+      <PrizeShowcase />
     </div>
   );
 };

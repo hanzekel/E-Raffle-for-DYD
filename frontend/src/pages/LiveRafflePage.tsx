@@ -8,14 +8,9 @@ import { LockIcon, ShieldIcon, DiceIcon, TicketIcon, ExpandIcon, CompressIcon } 
 import { EligiblePoolTicket } from '../types';
 import { FlyingTicketsVortex, DrawPhase } from '../components/FlyingTicketsVortex';
 import { WinningTicketCard } from '../components/WinningTicketCard';
+import { LIVE_DRAW_PRESET_PRIZES } from '../data/prizes';
 
-const PRESET_PRIZES = [
-  'Grand Prize: Brand New Scooter + ₱20,000',
-  '2nd Prize: Apple iPad Bundle + Pencil',
-  '3rd Prize: ₱15,000 Cash Prize',
-  'Consolation Prize: ₱1,000 Cash',
-  'Special Youth Camp Fellowship Award',
-];
+const PRESET_PRIZES = LIVE_DRAW_PRESET_PRIZES;
 
 export const LiveRafflePage: React.FC = () => {
   const { isAdmin, logout } = useAuth();

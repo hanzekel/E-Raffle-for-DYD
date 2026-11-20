@@ -3,7 +3,7 @@ import { api } from '../lib/api';
 import { ConfigData } from '../types';
 
 export const FALLBACK_CONFIG: ConfigData = {
-  ticketPrice: 100,
+  ticketPrice: 20,
   maxTickets: 10,
   gcashNumber: '09171701054',
   gcashName: 'ANGELA KAYE LUPAC',

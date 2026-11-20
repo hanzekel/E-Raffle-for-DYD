@@ -22,7 +22,7 @@ async function handler(_req: any, res: any) {
   return res.status(200).json({
     success: true,
     data: {
-      ticketPrice: Number(process.env.TICKET_PRICE || '100'),
+      ticketPrice: Number(process.env.TICKET_PRICE || '20'),
       maxTickets: Number(process.env.MAX_TICKETS_PER_REGISTRATION || '10'),
       gcashNumber: '09171701054',
       gcashName: 'ANGELA KAYE LUPAC',

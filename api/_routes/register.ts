@@ -9,7 +9,7 @@ async function handler(req: any, res: any) {
   }
 
   const data = result.data;
-  const TICKET_PRICE = Number(process.env.TICKET_PRICE || '100');
+  const TICKET_PRICE = Number(process.env.TICKET_PRICE || '20');
   const totalAmount = data.ticketCount * TICKET_PRICE;
 
   return res.status(200).json({
