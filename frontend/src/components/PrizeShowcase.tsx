@@ -1,9 +1,10 @@
+// frontend/src/components/PrizeShowcase.tsx
 // Official Major & Minor raffle prizes showcase for the landing page
 import React from 'react';
 import { RAFFLE_PRIZES, PrizeItem } from '../data/prizes';
 import { PrizeVisual } from './PrizeArtwork';
 import { GiftIcon, SparklesIcon } from './icons/Icons';
-import { SablayCornerRibbons, SablayButtonWrap } from './FilipinoMotifs';
+import { ChristmasCornerRibbons, ChristmasButtonWrap } from './FilipinoMotifs';
 
 const PrizeCard: React.FC<{ prize: PrizeItem }> = ({ prize }) => {
   const isMajor = prize.tier === 'major';
@@ -56,7 +57,7 @@ const PrizeCard: React.FC<{ prize: PrizeItem }> = ({ prize }) => {
       </div>
 
       {prize.shopUrl && (
-        <SablayButtonWrap className="mt-4 w-full">
+        <ChristmasButtonWrap className="mt-4 w-full">
           <a
             href={prize.shopUrl}
             target="_blank"
@@ -66,7 +67,7 @@ const PrizeCard: React.FC<{ prize: PrizeItem }> = ({ prize }) => {
             <span>{prize.shopLabel || 'View Prize Reference'}</span>
             <span>&rarr;</span>
           </a>
-        </SablayButtonWrap>
+        </ChristmasButtonWrap>
       )}
     </div>
   );
@@ -78,7 +79,7 @@ export const PrizeShowcase: React.FC = () => {
 
   return (
     <section id="prizes" className="mb-6 sm:mb-8 relative overflow-visible">
-      <SablayCornerRibbons size="lg" showBottomRight />
+      <ChristmasCornerRibbons size="lg" showBottomRight />
       <div className="rounded-2xl sm:rounded-3xl bg-white/95 border border-slate-200 shadow-sm p-4 sm:p-6 md:p-7">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100 pl-3">
           <div>

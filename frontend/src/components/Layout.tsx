@@ -1,10 +1,11 @@
+// frontend/src/components/Layout.tsx
 // Main application layout with role-aware header navigation
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Logo } from './Logo';
 import { useAuth } from '../hooks/useAuth';
 import { ShieldIcon } from './icons/Icons';
-import { SablayCornerRibbons } from './FilipinoMotifs';
+import { ChristmasCornerRibbons } from './FilipinoMotifs';
 
 export const Layout: React.FC = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -16,8 +17,8 @@ export const Layout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]/30 text-midnight-navy relative z-10">
       <header className="fixed top-0 left-0 right-0 h-14 bg-white/85 backdrop-blur-xl z-50 border-b border-midnight-navy/10 flex items-center justify-between px-3 md:px-8 shadow-sm">
-        {/* Curved 3D Sablay ribbon sash wrapping the DYD 2026 header bar corners on main page */}
-        {location.pathname === '/' && <SablayCornerRibbons size="sm" showBottomRight />}
+        {/* Curved 3D Christmas satin ribbon wrapping the DYD 2026 header corners on main page */}
+        {location.pathname === '/' && <ChristmasCornerRibbons size="sm" showBottomRight />}
 
         <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group relative z-10">
           <Logo size={36} />
@@ -118,17 +119,17 @@ export const Layout: React.FC = () => {
         <Outlet />
       </main>
 
-      <footer className="bg-[#F8FAFC]/90 backdrop-blur-md py-8 border-t border-midnight-navy/10 relative overflow-hidden">
+      <footer className="bg-gradient-to-r from-[#B92529]/95 via-[#991B1B]/95 to-[#B92529]/95 text-white backdrop-blur-md py-8 border-t border-gold/30 relative overflow-hidden">
         <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
-          <Logo size={34} className="mx-auto mb-3 opacity-80" />
-          <p className="font-heading font-bold text-midnight-navy text-lg mb-1">MOPCY DYD 2026</p>
-          <p className="text-midnight-navy/70 text-sm font-medium">Bayanihan in Christ &bull; Take Courage, Youth in Christ: 40 Years in Mission</p>
-          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-bold tracking-widest uppercase">
-            <span className="text-royal-blue">Faith</span>
-            <span className="text-gold">&bull;</span>
-            <span className="text-highlight-red">Culture</span>
-            <span className="text-gold">&bull;</span>
-            <span className="text-midnight-navy">Service</span>
+          <Logo size={34} className="mx-auto mb-3 bg-white/95 rounded-full p-1 shadow" />
+          <p className="font-heading font-bold text-white text-lg mb-1">MOPCY DYD 2026</p>
+          <p className="text-amber-100/90 text-sm font-medium">Maligayang Pasko &bull; Take Courage, Youth in Christ: 40 Years in Mission</p>
+          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-bold tracking-widest uppercase text-gold-light">
+            <span>Faith</span>
+            <span>&bull;</span>
+            <span>Hope</span>
+            <span>&bull;</span>
+            <span>Christmas Bayanihan</span>
           </div>
         </div>
       </footer>
