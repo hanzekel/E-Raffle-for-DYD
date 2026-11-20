@@ -13,11 +13,11 @@ import {
   SparklesIcon,
 } from '../components/icons/Icons';
 import { PrizeShowcase } from '../components/PrizeShowcase';
+import { RaffleGuideSection } from '../components/RaffleGuideSection';
 import {
   WinterSnowflakesOverlay,
   PineTreeGiftsArt,
   OrnamentGarland,
-  SleighSilhouette,
 } from '../components/FilipinoMotifs';
 
 export const LandingPage: React.FC = () => {
@@ -64,6 +64,7 @@ export const LandingPage: React.FC = () => {
   };
 
   const ticketPrice = config?.ticketPrice || 20;
+  const maxTickets = config?.maxTickets || 10;
 
   return (
     <div className="flex flex-col w-full pb-8 sm:pb-12 pt-1 sm:pt-2 px-3 sm:px-4 max-w-5xl mx-auto">
@@ -72,7 +73,7 @@ export const LandingPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
           <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-slate-800">
-            Raffle Now Open &bull; Paskong DYD 2026
+            Raffle Now Open &bull; Diocesan Youth Day 2026
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -85,9 +86,9 @@ export const LandingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Christmas Storyboard Grid */}
+      {/* Main Editorial Storyboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 auto-rows-min mb-6 sm:mb-8">
-        {/* 1. Frost-Sky Winter Hero Card */}
+        {/* 1. Frost-Sky Hero Card */}
         <div className="col-span-1 md:col-span-3 lg:col-span-4 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#D5ECF9] via-[#E9F5FC] to-white/95 text-midnight-navy shadow-xl relative overflow-hidden border border-white p-5 sm:p-7 md:p-8">
           <WinterSnowflakesOverlay className="absolute inset-0 w-full h-full opacity-95" />
 
@@ -96,23 +97,27 @@ export const LandingPage: React.FC = () => {
             <div className="lg:col-span-7">
               <span className="inline-flex items-center gap-1.5 bg-white/85 backdrop-blur border border-[#C81D25]/25 text-[#B91C1C] text-[11px] sm:text-xs font-extrabold px-3 py-1 rounded-full mb-3 shadow-sm">
                 <SparklesIcon size={14} className="text-[#C81D25]" />
-                <span>Maligayang Pasko &bull; Take Courage, Youth in Christ (40Y)</span>
+                <span>Hello Kalakbay!</span>
               </span>
 
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-black tracking-tight leading-tight py-1 text-midnight-navy mb-2">
-                Spread Christmas Joy. <span className="text-[#C81D25]">Send Youth to Camp.</span>
+                One Ticket. <span className="text-[#C81D25]">One Mission.</span>
               </h1>
 
-              <p className="text-slate-700 text-xs sm:text-sm leading-relaxed max-w-xl mb-5">
-                Celebrate the season of giving across all camps for only{' '}
-                <strong className="text-royal-blue">₱{ticketPrice}</strong> per raffle entry—every ticket funds DYD 2026 youth subsidies and gives you even more chances to win holiday gifts!
+              <p className="text-slate-700 text-xs sm:text-sm leading-relaxed max-w-xl mb-3">
+                Join the official Diocesan Youth Day 2026 raffle for only{' '}
+                <strong className="text-royal-blue">₱{ticketPrice}</strong> per entry—more tickets mean even more chances of winning!
+              </p>
+
+              <p className="text-[11px] sm:text-xs font-semibold italic text-midnight-navy/80 mb-5">
+                &ldquo;But take courage! I have overcome the world.&rdquo; &mdash; John 16:33
               </p>
 
               <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                 <Link
                   to={getRegisterLink()}
                   aria-label={`Get raffle e-tickets for ${ticketPrice} pesos`}
-                  className="btn-christmas-red text-center"
+                  className="btn-festive-red text-center"
                 >
                   Get E-Tickets &bull; ₱{ticketPrice}
                 </Link>
@@ -126,7 +131,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Holiday Scene Illustration & Quick Highlights */}
+            {/* Right Illustration & Quick Highlights */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm rounded-2xl p-4 border border-white shadow-sm">
               <PineTreeGiftsArt className="w-56 sm:w-64 h-auto" />
               <div className="grid grid-cols-3 gap-2 w-full mt-2 pt-2 border-t border-slate-200/70 text-center">
@@ -147,38 +152,36 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. Dark Twilight + Holiday Crimson Split Countdown Strip */}
+        {/* 2. Dark Twilight + Crimson Split Countdown Strip */}
         <div className="col-span-1 md:col-span-3 lg:col-span-4 rounded-2xl sm:rounded-3xl overflow-hidden shadow-md border border-white/40 grid grid-cols-1 md:grid-cols-12">
-          {/* Dark Twilight Ornaments Half */}
+          {/* Left Panel */}
           <div className="md:col-span-5 bg-[#1F242B]/95 text-white p-4 sm:p-6 flex flex-col justify-between relative overflow-hidden">
             <OrnamentGarland className="w-full h-14 -mt-4 opacity-95" />
             <div className="mt-2">
               <span className="text-[10px] uppercase font-extrabold tracking-widest text-gold">
-                Christmas Grand Draw
+                Grand Raffle Draw
               </span>
               <h2 className="font-heading font-bold text-lg sm:text-xl text-white mt-0.5">
                 December 11, 2026 &bull; 1:30 PM
               </h2>
               <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                Drawn live on stage with our youth council team—every ₱{ticketPrice} entry counts equally.
+                Drawn live on stage with our youth council team—every ₱{ticketPrice} entry gets an equal shot.
               </p>
             </div>
           </div>
 
-          {/* Holiday Crimson Countdown Counter Half */}
+          {/* Right Crimson Countdown Panel */}
           <div className="md:col-span-7 bg-gradient-to-br from-[#C8232C] to-[#991B1B]/95 text-white p-4 sm:p-6 flex flex-col justify-center relative overflow-hidden">
-            <SleighSilhouette className="w-28 h-10 text-black/20 absolute right-3 bottom-1 pointer-events-none" />
-
             {isDrawLive ? (
               <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
                 <div>
                   <div className="flex items-center gap-2">
                     <CelebrationIcon size={22} className="text-gold-light" />
-                    <p className="font-heading font-black text-xl">CHRISTMAS DRAW LIVE NOW!</p>
+                    <p className="font-heading font-black text-xl">GRAND DRAW LIVE NOW!</p>
                   </div>
                   <p className="text-xs text-amber-100 mt-1">Winning raffle tickets are being drawn live on stage</p>
                 </div>
-                <Link to="/live" className="btn-christmas-gold text-xs whitespace-nowrap">
+                <Link to="/live" className="btn-festive-gold text-xs whitespace-nowrap">
                   Watch Live Draw &rarr;
                 </Link>
               </div>
@@ -283,13 +286,13 @@ export const LandingPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* 4. Mission Impact & Holiday Editorial Card */}
+        {/* 4. Mission Impact Card */}
         <div className="md:col-span-3 lg:col-span-2 rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-md border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Share A Smile This Christmas
+                <span className="text-[10px] uppercase font-bold tracking-widest text-royal-blue bg-royal-blue/10 px-2.5 py-0.5 rounded-full">
+                  40 Years in Mission
                 </span>
                 <h2 className="font-heading font-bold text-base sm:text-lg text-slate-900 mt-1.5">
                   Where Your ₱{ticketPrice} Goes
@@ -307,7 +310,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <h3 className="font-bold text-xs text-slate-800">Youth Subsidies</h3>
                 <p className="text-[11px] text-slate-600 mt-0.5">
-                  Helps sponsor camp passes for delegates in need.
+                  Supports participation for youth delegates in need.
                 </p>
               </div>
               <div className="p-3 rounded-2xl bg-rose-50/70 border border-rose-100">
@@ -331,7 +334,7 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Bottom Two-Tone Quick Actions Banner (Frost Blue + Holiday Crimson split) */}
+          {/* Bottom Two-Tone Quick Actions Banner */}
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
             <div className="rounded-2xl bg-[#D9EFFA]/85 p-3.5 flex items-center justify-between gap-2 border border-sky-200/60">
               <div className="flex items-center gap-2.5">
@@ -339,7 +342,7 @@ export const LandingPage: React.FC = () => {
                   <GiftIcon size={18} />
                 </span>
                 <div>
-                  <p className="font-bold text-xs text-midnight-navy">Holiday Rewards</p>
+                  <p className="font-bold text-xs text-midnight-navy">Official Prizes</p>
                   <p className="text-[10px] text-slate-600">Major &amp; Minor Prizes</p>
                 </div>
               </div>
@@ -365,7 +368,7 @@ export const LandingPage: React.FC = () => {
               <Link
                 to="/live"
                 aria-label="Go to the live raffle draw stage"
-                className="btn-christmas-gold px-3.5 py-1.5 text-[11px] whitespace-nowrap"
+                className="btn-festive-gold px-3.5 py-1.5 text-[11px] whitespace-nowrap"
               >
                 Watch &rarr;
               </Link>
@@ -376,6 +379,14 @@ export const LandingPage: React.FC = () => {
 
       {/* Visual Major & Minor Prizes Showcase */}
       <PrizeShowcase />
+
+      {/* Step-by-Step Instructions & Frequently Asked Questions */}
+      <RaffleGuideSection
+        ticketPrice={ticketPrice}
+        maxTickets={maxTickets}
+        gcashNumber={config?.gcashNumber || '09171701054'}
+        gcashName={config?.gcashName || 'ANGELA KAYE LUPAC'}
+      />
     </div>
   );
 };

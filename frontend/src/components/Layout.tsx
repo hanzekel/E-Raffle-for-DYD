@@ -119,14 +119,15 @@ export const Layout: React.FC = () => {
         <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
           <Logo size={34} className="mx-auto mb-3 bg-white/95 rounded-full p-1 shadow" />
           <p className="font-heading font-bold text-white text-lg mb-1">MOPCY DYD 2026</p>
-          <p className="text-amber-100/90 text-sm font-medium">Maligayang Pasko &bull; Take Courage, Youth in Christ: 40 Years in Mission</p>
-          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] font-bold tracking-widest uppercase text-gold-light">
-            <span>Faith</span>
-            <span>&bull;</span>
-            <span>Hope</span>
-            <span>&bull;</span>
-            <span>Christmas Bayanihan</span>
-          </div>
+          <p className="text-amber-100/95 text-sm font-medium">
+            Take Courage, Youth in Christ: 40 Years in Mission
+          </p>
+          <p className="text-white/90 text-xs italic mt-2">
+            &ldquo;But take courage! I have overcome the world.&rdquo; &mdash; John 16:33
+          </p>
+          <p className="mt-3 text-[11px] font-extrabold tracking-widest uppercase text-gold-light">
+            Hukbong Kalakbay, MOPCY! Sir Yes Sir! AHU AHU!
+          </p>
         </div>
       </footer>
     </div>

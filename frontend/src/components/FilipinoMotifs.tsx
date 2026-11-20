@@ -1,8 +1,8 @@
 // frontend/src/components/FilipinoMotifs.tsx
-// Vector SVG Christmas holiday motifs: winter snowfall, pine trees with gifts, ornaments garland & sleigh
+// Vector SVG seasonal motifs: winter snowfall, pine trees with gift boxes & garland ornaments
 import React from 'react';
 
-// Gentle crisp SVG snowfall backdrop & snowbank horizon for hero winter sky
+// Gentle crisp SVG snowfall backdrop & snowbank horizon for hero sky
 export const WinterSnowflakesOverlay: React.FC<{ className?: string }> = ({ className = '' }) => (
   <svg
     viewBox="0 0 600 260"
@@ -32,7 +32,7 @@ export const WinterSnowflakesOverlay: React.FC<{ className?: string }> = ({ clas
   </svg>
 );
 
-// Pine trees, wrapped gifts & Parol star illustration
+// Pine trees, wrapped prize boxes & Parol star illustration
 export const PineTreeGiftsArt: React.FC<{ className?: string }> = ({ className = 'w-full h-auto' }) => (
   <svg viewBox="0 0 260 170" className={className} fill="none" aria-hidden="true">
     <circle cx="132" cy="86" r="70" fill="#E0F2FE" />
@@ -66,7 +66,7 @@ export const PineTreeGiftsArt: React.FC<{ className?: string }> = ({ className =
   </svg>
 );
 
-// Hanging Christmas ornaments garland for dark twilight countdown panel
+// Hanging decorative garland for dark twilight countdown panel
 export const OrnamentGarland: React.FC<{ className?: string }> = ({ className = 'w-full h-14' }) => (
   <svg viewBox="0 0 320 60" className={className} fill="none" aria-hidden="true">
     <path d="M0 4 Q 160 12, 320 4" stroke="#FDE68A" strokeWidth="1.2" strokeOpacity="0.6" />
@@ -83,22 +83,5 @@ export const OrnamentGarland: React.FC<{ className?: string }> = ({ className = 
     <circle cx="242" cy="43" r="2.5" fill="#FDE68A" />
     <line x1="292" y1="5" x2="292" y2="26" stroke="#CBD5E1" strokeWidth="1" />
     <circle cx="292" cy="34" r="8" fill="#5BB8F5" />
-  </svg>
-);
-
-// Subtle sleigh silhouette for the festive crimson countdown strip
-export const SleighSilhouette: React.FC<{ className?: string }> = ({ className = 'w-28 h-10' }) => (
-  <svg viewBox="0 0 180 56" className={className} fill="currentColor" aria-hidden="true">
-    <path d="M18 38 C24 38, 30 34, 34 26 L56 26 C58 34, 64 38, 70 38 L74 44 L16 44 Z" />
-    <path d="M12 46 Q 44 50, 78 44" stroke="currentColor" strokeWidth="2.5" fill="none" />
-    <ellipse cx="112" cy="32" rx="10" ry="5" />
-    <circle cx="122" cy="24" r="4" />
-    <line x1="106" y1="36" x2="102" y2="45" stroke="currentColor" strokeWidth="2" />
-    <line x1="118" y1="36" x2="122" y2="45" stroke="currentColor" strokeWidth="2" />
-    <ellipse cx="146" cy="28" rx="10" ry="5" />
-    <circle cx="156" cy="20" r="4" />
-    <line x1="140" y1="32" x2="136" y2="41" stroke="currentColor" strokeWidth="2" />
-    <line x1="152" y1="32" x2="156" y2="41" stroke="currentColor" strokeWidth="2" />
-    <path d="M56 26 Q 98 30, 152 22" stroke="currentColor" strokeWidth="1" fill="none" strokeOpacity="0.6" />
   </svg>
 );
