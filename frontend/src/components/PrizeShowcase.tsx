@@ -3,6 +3,7 @@ import React from 'react';
 import { RAFFLE_PRIZES, PrizeItem } from '../data/prizes';
 import { PrizeVisual } from './PrizeArtwork';
 import { GiftIcon, SparklesIcon } from './icons/Icons';
+import { WovenRibbon } from './FilipinoMotifs';
 
 const PrizeCard: React.FC<{ prize: PrizeItem }> = ({ prize }) => {
   const isMajor = prize.tier === 'major';
@@ -59,7 +60,7 @@ const PrizeCard: React.FC<{ prize: PrizeItem }> = ({ prize }) => {
           href={prize.shopUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center justify-between w-full text-xs font-bold text-royal-blue hover:text-midnight-navy bg-royal-blue/5 hover:bg-royal-blue/10 px-3.5 py-2 rounded-xl transition-colors"
+          className="btn-secondary mt-4 inline-flex items-center justify-between w-full text-xs font-bold px-3.5 py-2"
         >
           <span>{prize.shopLabel || 'View Prize Reference'}</span>
           <span>&rarr;</span>
@@ -75,47 +76,50 @@ export const PrizeShowcase: React.FC = () => {
 
   return (
     <section id="prizes" className="mb-6 sm:mb-8">
-      <div className="rounded-2xl sm:rounded-3xl bg-white/95 border border-slate-200 p-4 sm:p-6 md:p-7 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
-          <div>
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-royal-blue bg-royal-blue/10 px-3 py-1 rounded-full mb-2">
-              <GiftIcon size={13} />
-              <span>Official Raffle Rewards</span>
+      <div className="rounded-2xl sm:rounded-3xl bg-white/95 border border-slate-200 shadow-sm overflow-hidden">
+        <WovenRibbon className="h-[6px] w-full" />
+        <div className="p-4 sm:p-6 md:p-7">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
+            <div>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-highlight-red bg-highlight-red/10 px-3 py-1 rounded-full mb-2">
+                <GiftIcon size={13} />
+                <span>Official Raffle Rewards</span>
+              </span>
+              <h2 className="font-heading font-black text-xl sm:text-2xl gradient-text leading-tight py-1">
+                Prizes You Could Win
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                More entries at ₱20 each means even bigger chances to bring one home!
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-gold bg-midnight-navy px-3.5 py-1.5 rounded-full self-start sm:self-center border border-gold/30">
+              <SparklesIcon size={14} className="text-gold" />
+              <span>Major &amp; Minor Draws</span>
             </span>
-            <h2 className="font-heading font-black text-xl sm:text-2xl text-slate-900">
-              Prizes You Could Win
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              More entries at ₱20 each means even bigger chances to bring one home!
-            </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-gold bg-midnight-navy px-3.5 py-1.5 rounded-full self-start sm:self-center">
-            <SparklesIcon size={14} className="text-gold" />
-            <span>Major &amp; Minor Draws</span>
-          </span>
-        </div>
 
-        {/* Major Prizes Row */}
-        <div className="mb-6">
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-midnight-navy/60 mb-3">
-            Major Prizes
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            {majorPrizes.map((prize) => (
-              <PrizeCard key={prize.id} prize={prize} />
-            ))}
+          {/* Major Prizes Row */}
+          <div className="mb-6">
+            <h3 className="text-xs font-extrabold uppercase tracking-widest text-royal-blue mb-3">
+              Major Prizes
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              {majorPrizes.map((prize) => (
+                <PrizeCard key={prize.id} prize={prize} />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Minor Prizes Row */}
-        <div>
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-midnight-navy/60 mb-3">
-            Minor Prizes
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            {minorPrizes.map((prize) => (
-              <PrizeCard key={prize.id} prize={prize} />
-            ))}
+          {/* Minor Prizes Row */}
+          <div>
+            <h3 className="text-xs font-extrabold uppercase tracking-widest text-highlight-red mb-3">
+              Minor Prizes
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              {minorPrizes.map((prize) => (
+                <PrizeCard key={prize.id} prize={prize} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

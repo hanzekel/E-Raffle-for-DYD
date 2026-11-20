@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Seamless Filipino banig/inabel diamond weave in Philippine Royal Blue, Crimson Red, Sun Gold & Pearl White */
+  --woven-ethnic-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Crect width='24' height='12' fill='%230D1F5C'/%3E%3Cpolygon points='0,6 6,0 12,6 6,12' fill='%23E63030'/%3E%3Cpolygon points='12,6 18,0 24,6 18,12' fill='%231A3A8F'/%3E%3Cpolygon points='6,6 9,3 12,6 9,9' fill='%23F5A623'/%3E%3Cpolygon points='18,6 21,3 24,6 21,9' fill='%23F5A623'/%3E%3Cpolygon points='0,6 3,3 6,6 3,9' fill='%23FFFFFF'/%3E%3Cpolygon points='12,6 15,3 18,6 15,9' fill='%23FFFFFF'/%3E%3Cpath d='M0 0L24 0M0 12L24 12' stroke='%23F5A623' stroke-width='1' stroke-opacity='0.65'/%3E%3C/svg%3E");
+}
+
 @layer base {
   html {
     /* Scale down ~10% to comfortably fit 1080p and laptop screens without excessive scrolling */
@@ -10,20 +15,51 @@
   }
   body { 
     @apply bg-slate-50 text-slate-900 font-sans min-h-screen bg-fixed overflow-x-hidden max-w-[100vw]; 
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a3a8f' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath d='M24 4L28 8L24 12L20 8Z' fill='%23F5A623' fill-opacity='0.06'/%3E%3Cpath d='M24 36L28 40L24 44L20 40Z' fill='%23E63030' fill-opacity='0.04'/%3E%3Cpath d='M8 20L12 24L8 28L4 24Z' fill='%231A3A8F' fill-opacity='0.04'/%3E%3Cpath d='M40 20L44 24L40 28L36 24Z' fill='%231A3A8F' fill-opacity='0.04'/%3E%3C/g%3E%3C/svg%3E");
   }
 }
 
 @layer components {
-  /* Launch UI Button Patterns - Compact Fit */
-  .btn-primary { 
-    @apply bg-gradient-to-b from-royal-blue to-midnight-navy text-white font-semibold px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm rounded-full shadow-[0_6px_18px_rgb(13,31,92,0.2)] hover:shadow-[0_8px_22px_rgb(13,31,92,0.3)] hover:-translate-y-0.5 transition-all; 
+  .woven-ethnic-bar {
+    background-image: var(--woven-ethnic-bg);
+    background-repeat: repeat;
+    background-size: 24px 12px;
   }
-  .btn-secondary { 
-    @apply bg-white backdrop-blur-xl border border-slate-200 text-slate-700 font-semibold px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm rounded-full shadow-sm hover:shadow-md hover:bg-slate-50 transition-all; 
+
+  /* Launch UI Button Patterns wrapped with seamless Philippine woven ethnic border */
+  .btn-primary {
+    @apply text-white font-semibold px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm rounded-full shadow-[0_6px_18px_rgb(13,31,92,0.24)] hover:shadow-[0_10px_24px_rgba(245,166,35,0.35)] hover:-translate-y-0.5 active:scale-95 transition-all border-[3px] border-transparent;
+    background-image: linear-gradient(to bottom, #1A3A8F, #0D1F5C), var(--woven-ethnic-bg);
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
   }
-  .btn-danger { 
-    @apply bg-gradient-to-b from-red-500/90 to-red-600 text-white font-semibold py-1.5 px-3.5 rounded-full shadow-md hover:from-red-500 hover:to-red-700 transition-all text-xs; 
+
+  .btn-secondary {
+    @apply text-midnight-navy font-semibold px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5 active:scale-95 transition-all border-[2.5px] border-transparent;
+    background-image: linear-gradient(to bottom, #FFFFFF, #F8FAFC), var(--woven-ethnic-bg);
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .btn-woven-gold {
+    @apply text-midnight-navy font-black px-6 py-2.5 sm:px-7 sm:py-3 text-xs sm:text-sm rounded-full shadow-[0_8px_22px_rgba(245,166,35,0.35)] hover:shadow-[0_10px_26px_rgba(245,166,35,0.5)] hover:-translate-y-0.5 active:scale-95 transition-all border-[3px] border-transparent;
+    background-image: linear-gradient(135deg, #F7B84D, #F5A623), var(--woven-ethnic-bg);
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .btn-woven-glass {
+    @apply text-white font-semibold px-5 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all border-[2.5px] border-transparent;
+    background-image: linear-gradient(to bottom, rgba(13, 31, 92, 0.85), rgba(20, 46, 115, 0.92)), var(--woven-ethnic-bg);
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .btn-danger {
+    @apply text-white font-semibold py-1.5 px-3.5 rounded-full shadow-md hover:-translate-y-0.5 transition-all text-xs border-2 border-transparent;
+    background-image: linear-gradient(to bottom, #E63030, #B91C1C), var(--woven-ethnic-bg);
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
   }
 
   /* Form Input Pattern - Fit to Screen */
@@ -33,12 +69,12 @@
 
   /* Glassmorphism Card - Compact Viewport */
   .card { 
-    @apply bg-white/70 backdrop-blur-xl border border-white/50 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 md:p-6 shadow-[0_8px_25px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_25px_rgb(26,58,143,0.1)] hover:bg-white/90 transition-all duration-300; 
+    @apply bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 md:p-6 shadow-[0_8px_25px_rgb(13,31,92,0.05)] hover:shadow-[0_10px_28px_rgb(26,58,143,0.12)] hover:bg-white/95 transition-all duration-300; 
   }
   
   /* Utilities */
   .glass {
-    @apply bg-white/70 backdrop-blur-2xl border border-white/50 shadow-sm;
+    @apply bg-white/80 backdrop-blur-2xl border border-white/60 shadow-sm;
   }
   .animate-appear {
     @apply opacity-0 animate-[appear_0.6s_cubic-bezier(0.2,0.8,0.2,1)_forwards];
@@ -50,6 +86,6 @@
     @apply border-b border-slate-200/50;
   }
   .gradient-text {
-    @apply bg-gradient-to-r from-royal-blue to-midnight-navy bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-royal-blue via-midnight-navy to-highlight-red bg-clip-text text-transparent;
   }
 }
