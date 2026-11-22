@@ -1,3 +1,4 @@
+// frontend/src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useConfig } from '../hooks/useConfig';
@@ -26,6 +27,7 @@ export const RegisterPage: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof RegistrationFormData, string>>>({});
+  const [ticketInput, setTicketInput] = useState('1');
   const [customCamp, setCustomCamp] = useState(isPrefillCustom ? prefillCamp : '');
   const [isOtherSelected, setIsOtherSelected] = useState(isPrefillCustom);
   const [showSummary, setShowSummary] = useState(false);
@@ -35,17 +37,49 @@ export const RegisterPage: React.FC = () => {
   // Config is guaranteed via fallback, no freeze
   if (loading && !config) return <LoadingSpinner message="Loading registration form..." />;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    let finalValue: any = value;
+  const maxTickets = config.maxTickets || 10;
 
-    if (name === 'ticketCount') {
-      finalValue = parseInt(value, 10) || 1;
+  // Keeps stepper buttons, quick pills, and numeric text box synchronized
+  const setTicketQuantity = (qty: number) => {
+    const clamped = Math.max(1, Math.min(maxTickets, qty));
+    setTicketInput(String(clamped));
+    setFormData(prev => ({ ...prev, ticketCount: clamped }));
+    const err = validateField(registrationSchema, 'ticketCount', clamped);
+    setErrors(prev => ({ ...prev, ticketCount: err || undefined }));
+  };
+
+  const handleTicketTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digitsOnly = e.target.value.replace(/\D/g, '');
+    setTicketInput(digitsOnly);
+
+    if (digitsOnly === '') {
+      setFormData(prev => ({ ...prev, ticketCount: 0 }));
+      setErrors(prev => ({ ...prev, ticketCount: 'Enter between 1 and ' + maxTickets + ' tickets' }));
+      return;
     }
 
-    setFormData(prev => ({ ...prev, [name]: finalValue }));
+    const parsed = parseInt(digitsOnly, 10);
+    setFormData(prev => ({ ...prev, ticketCount: parsed }));
+    const err = validateField(registrationSchema, 'ticketCount', parsed);
+    setErrors(prev => ({ ...prev, ticketCount: err || undefined }));
+  };
 
-    const err = validateField(registrationSchema, name, finalValue);
+  const handleTicketBlur = () => {
+    if (ticketInput === '') {
+      setTicketQuantity(1);
+    } else {
+      const parsed = parseInt(ticketInput, 10);
+      if (!Number.isNaN(parsed)) {
+        setTicketQuantity(parsed);
+      }
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    const err = validateField(registrationSchema, name, value);
     setErrors(prev => ({ ...prev, [name]: err || undefined }));
   };
 
@@ -162,9 +196,73 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-midnight-navy/70">Number of Tickets</label>
-            <input type="number" name="ticketCount" value={formData.ticketCount} onChange={handleChange} min={1} max={config.maxTickets} className="input-field" />
-            {errors.ticketCount && <p className="text-highlight-red text-sm mt-1">{errors.ticketCount}</p>}
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="ticketCountInput" className="block text-sm font-medium text-midnight-navy/70">
+                Number of Tickets
+              </label>
+              <span className="text-[11px] font-medium text-midnight-navy/50">
+                Max {maxTickets} per order
+              </span>
+            </div>
+
+            {/* Touch-friendly stepper for phones & tablets alongside numeric input */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setTicketQuantity(formData.ticketCount - 1)}
+                disabled={formData.ticketCount <= 1}
+                aria-label="Decrease ticket quantity"
+                className="min-h-[44px] min-w-[44px] rounded-xl border border-slate-200 bg-white text-midnight-navy font-bold text-lg shadow-sm hover:bg-slate-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+              >
+                &minus;
+              </button>
+              <input
+                id="ticketCountInput"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                name="ticketCount"
+                value={ticketInput}
+                onChange={handleTicketTextChange}
+                onBlur={handleTicketBlur}
+                aria-label="Number of tickets"
+                className="input-field text-center font-bold text-base min-h-[44px]"
+              />
+              <button
+                type="button"
+                onClick={() => setTicketQuantity(formData.ticketCount + 1)}
+                disabled={formData.ticketCount >= maxTickets}
+                aria-label="Increase ticket quantity"
+                className="min-h-[44px] min-w-[44px] rounded-xl border border-slate-200 bg-white text-midnight-navy font-bold text-lg shadow-sm hover:bg-slate-50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+              >
+                +
+              </button>
+            </div>
+
+            {/* 1-tap quick-select pills for mobile & tablet */}
+            <div className="flex flex-wrap gap-1.5 mt-2.5" role="group" aria-label="Quick ticket quantity options">
+              {[1, 2, 3, 5, 10]
+                .filter((qty) => qty <= maxTickets)
+                .map((qty) => {
+                  const selected = formData.ticketCount === qty && ticketInput !== '';
+                  return (
+                    <button
+                      key={qty}
+                      type="button"
+                      onClick={() => setTicketQuantity(qty)}
+                      aria-pressed={selected}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all active:scale-95 ${
+                        selected
+                          ? 'bg-royal-blue text-white border-royal-blue shadow-sm'
+                          : 'bg-slate-50 text-midnight-navy/75 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {qty} {qty === 1 ? 'Ticket' : 'Tickets'}
+                    </button>
+                  );
+                })}
+            </div>
+            {errors.ticketCount && <p className="text-highlight-red text-sm mt-1.5">{errors.ticketCount}</p>}
           </div>
 
           <div className="bg-midnight-navy/[0.03] p-6 rounded-xl border border-midnight-navy/[0.08] mt-8 flex flex-col sm:flex-row justify-between items-center">
