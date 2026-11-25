@@ -1,3 +1,4 @@
+// frontend/src/components/FlyingTicketsVortex.tsx
 // 1:1 3D paper physics chamber + decelerating ticket scanner synced with server CSPRNG draw
 import React, { useEffect, useRef, useState } from 'react';
 import { EligiblePoolTicket } from '../types';
@@ -61,6 +62,7 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
   const drawPhaseRef = useRef<DrawPhase>(drawPhase);
   const highlightedTicketRef = useRef<string | null>(null);
   const lockedTicketRef = useRef<string | null>(null);
+  const lockedWinnerDetailsRef = useRef<{ ticketNumber: string; name: string; camp: string } | null>(null);
 
   const [isAudioMuted, setIsAudioMuted] = useState(raffleAudio.getMuted());
   const [scannedTicket, setScannedTicket] = useState<{
@@ -107,8 +109,8 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
         dPitch: (Math.random() - 0.5) * 0.06,
         dYaw: (Math.random() - 0.5) * 0.07,
         dRoll: (Math.random() - 0.5) * 0.03,
-        w: 96,
-        h: 48,
+        w: 112,
+        h: 58,
         ticketNumber: src.ticketNumber,
         name: src.registration?.fullName || 'Participant',
         camp: src.registration?.campName || '',
@@ -133,6 +135,7 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
       raffleAudio.stopDrawStorm();
       highlightedTicketRef.current = null;
       lockedTicketRef.current = null;
+      lockedWinnerDetailsRef.current = null;
       setScannedTicket(null);
       return;
     }
@@ -140,6 +143,7 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
     if (drawPhase === 'mixing') {
       highlightedTicketRef.current = null;
       lockedTicketRef.current = null;
+      lockedWinnerDetailsRef.current = null;
       setScannedTicket(null);
       confettiRef.current = [];
       raffleAudio.startDrawStorm();
@@ -169,6 +173,11 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
           if (isFinal) {
             highlightedTicketRef.current = targetNum;
             lockedTicketRef.current = targetNum;
+            lockedWinnerDetailsRef.current = {
+              ticketNumber: targetNum,
+              name: targetName,
+              camp: targetCamp,
+            };
             setScannedTicket({
               ticketNumber: targetNum,
               name: targetName,
@@ -198,6 +207,11 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
     if (drawPhase === 'revealed' && winner) {
       highlightedTicketRef.current = winner.ticketNumber;
       lockedTicketRef.current = winner.ticketNumber;
+      lockedWinnerDetailsRef.current = {
+        ticketNumber: winner.ticketNumber,
+        name: winner.registration?.fullName || 'Verified Participant',
+        camp: winner.registration?.campName || '',
+      };
       setScannedTicket(null);
       raffleAudio.playCelebrationFanfare();
 
@@ -423,18 +437,37 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
         ctx.arc(-tw / 2 + 20, th / 2, 3.2, Math.PI, 0);
         ctx.fill();
 
-        // Legible Ticket Number & Participant Name on face-up stubs
+        // Legible Name -> Ticket Number -> Camp stacked cleanly on face-up stubs
         if (scale > 0.42 && normalZ > -0.25) {
-          ctx.fillStyle = textColor;
-          ctx.font = 'bold 8.5px monospace';
+          const lockedDetails = isLocked && lockedWinnerDetailsRef.current?.ticketNumber === t.ticketNumber
+            ? lockedWinnerDetailsRef.current
+            : null;
+          const displayName = lockedDetails?.name || t.name;
+          const displayCamp = lockedDetails?.camp || t.camp;
+
+          const shortName = displayName.length > 15 ? `${displayName.slice(0, 14)}…` : displayName;
+          const shortCamp = displayCamp.length > 18 ? `${displayCamp.slice(0, 17)}…` : displayCamp;
+
           ctx.textAlign = 'left';
           ctx.textBaseline = 'middle';
-          ctx.fillText(t.ticketNumber, -tw / 2 + 25, -6);
 
+          // 1. Participant Name (primary line)
+          ctx.fillStyle = textColor;
+          ctx.font = 'bold 8.5px sans-serif';
+          ctx.fillText(shortName, -tw / 2 + 25, -12);
+
+          // 2. Ticket Number right below Name
           ctx.fillStyle = isHighlighted || isLocked ? '#0F172A' : accentColor;
-          ctx.font = 'bold 7.5px sans-serif';
-          const shortName = t.name.length > 13 ? `${t.name.slice(0, 12)}…` : t.name;
-          ctx.fillText(shortName, -tw / 2 + 25, 7);
+          ctx.font = 'bold 7.5px monospace';
+          ctx.fillText(t.ticketNumber, -tw / 2 + 25, 2);
+
+          // 3. Camp Name underneath
+          if (shortCamp) {
+            ctx.fillStyle = isHighlighted || isLocked ? 'rgba(15, 23, 42, 0.8)' : textColor;
+            ctx.globalAlpha = (locked && !isLocked ? 0.25 : 1) * 0.82;
+            ctx.font = '600 6.5px sans-serif';
+            ctx.fillText(shortCamp, -tw / 2 + 25, 14);
+          }
         }
 
         ctx.restore();
@@ -519,12 +552,17 @@ export const FlyingTicketsVortex: React.FC<FlyingTicketsVortexProps> = ({
               <span className={`text-[9px] font-black uppercase tracking-widest block ${scannedTicket.isLocked ? 'text-midnight-navy/80' : 'text-gold'}`}>
                 {scannedTicket.isLocked ? '✓ Winner Picked!' : 'Picking a Winner...'}
               </span>
-              <div className="font-mono text-base sm:text-xl font-black tracking-wider">
+              <div className={`font-heading text-lg sm:text-2xl font-black tracking-tight truncate max-w-[270px] mx-auto leading-tight mt-0.5 ${scannedTicket.isLocked ? 'text-midnight-navy' : 'text-white'}`}>
+                {scannedTicket.name}
+              </div>
+              <div className={`font-mono text-xs sm:text-sm font-bold tracking-widest mt-0.5 ${scannedTicket.isLocked ? 'text-midnight-navy/85' : 'text-gold'}`}>
                 {scannedTicket.ticketNumber}
               </div>
-              <div className={`text-xs font-bold truncate max-w-[260px] mx-auto ${scannedTicket.isLocked ? 'text-midnight-navy' : 'text-sky-200'}`}>
-                {scannedTicket.name} {scannedTicket.camp ? `• ${scannedTicket.camp}` : ''}
-              </div>
+              {scannedTicket.camp && (
+                <div className={`text-[11px] font-semibold truncate max-w-[260px] mx-auto mt-0.5 ${scannedTicket.isLocked ? 'text-midnight-navy/75' : 'text-sky-200'}`}>
+                  {scannedTicket.camp}
+                </div>
+              )}
             </div>
           </div>
         )}

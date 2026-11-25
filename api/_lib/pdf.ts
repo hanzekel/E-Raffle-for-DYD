@@ -129,44 +129,59 @@ export async function generateTicketPdf(data: {
 }
 
 export async function generateAllTickets(registration: any) {
-  const tickets = [];
-  const pdfBuffers = [];
   const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'dyd26-uploads';
   const eventDate = new Date().toLocaleDateString();
 
-  for (let i = 0; i < registration.ticketCount; i++) {
-    const randomHex = crypto.randomBytes(4).toString('hex').toUpperCase();
-    const ticketNumber = `DYD26-${randomHex}`;
-
-    const pdfBytes = await generateTicketPdf({
-      ticketNumber,
-      holderName: registration.fullName,
-      campName: registration.campName,
-      eventDate,
-      ticketIndex: i + 1,
-      totalTickets: registration.ticketCount,
-    });
-
-    const pdfBuffer = Buffer.from(pdfBytes);
-    const filename = `${ticketNumber}.pdf`;
-    const filePath = `tickets/${registration.id}/${filename}`;
-
-    const pdfUrl = await uploadFile(BUCKET, filePath, pdfBuffer, 'application/pdf');
-
-    pdfBuffers.push({ filename, content: pdfBuffer });
-    
-    // Create ticket record in DB
-    const ticket = await prisma.ticket.create({
-      data: {
-        registrationId: registration.id,
-        ticketNumber,
-        qrCodeData: ticketNumber, // Decoding QR just returns ticketNumber
-        pdfUrl: pdfUrl,
-      },
-    });
-
-    tickets.push(ticket);
+  // Pre-generate distinct random ticket codes for this batch
+  const ticketNumbers: string[] = [];
+  const used = new Set<string>();
+  while (ticketNumbers.length < registration.ticketCount) {
+    const code = `DYD26-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    if (!used.has(code)) {
+      used.add(code);
+      ticketNumbers.push(code);
+    }
   }
+
+  // Generate PDFs and upload to Supabase Storage concurrently to stay well under serverless timeout
+  const prepared = await Promise.all(
+    ticketNumbers.map(async (ticketNumber, i) => {
+      const pdfBytes = await generateTicketPdf({
+        ticketNumber,
+        holderName: registration.fullName,
+        campName: registration.campName,
+        eventDate,
+        ticketIndex: i + 1,
+        totalTickets: registration.ticketCount,
+      });
+
+      const pdfBuffer = Buffer.from(pdfBytes);
+      const filename = `${ticketNumber}.pdf`;
+      const filePath = `tickets/${registration.id}/${filename}`;
+      const pdfUrl = await uploadFile(BUCKET, filePath, pdfBuffer, 'application/pdf');
+
+      return { ticketNumber, filename, pdfBuffer, pdfUrl };
+    })
+  );
+
+  // Persist all generated tickets atomically in a single transaction
+  const tickets = await prisma.$transaction(
+    prepared.map((item) =>
+      prisma.ticket.create({
+        data: {
+          registrationId: registration.id,
+          ticketNumber: item.ticketNumber,
+          qrCodeData: item.ticketNumber, // Decoding QR returns ticketNumber
+          pdfUrl: item.pdfUrl,
+        },
+      })
+    )
+  );
+
+  const pdfBuffers = prepared.map((item) => ({
+    filename: item.filename,
+    content: item.pdfBuffer,
+  }));
 
   return { tickets, pdfBuffers };
 }

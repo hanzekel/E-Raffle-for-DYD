@@ -1,3 +1,4 @@
+// frontend/src/components/WinningTicketCard.tsx
 // High-fidelity physical golden raffle ticket stub with tear-off notch and verified details
 import React, { useState } from 'react';
 import { TrophyIcon, ShieldIcon, CheckIcon, CopyIcon } from './icons/Icons';
@@ -101,19 +102,19 @@ export const WinningTicketCard: React.FC<WinningTicketCardProps> = ({
               <span className="truncate max-w-[280px] sm:max-w-md">{winner.prizeName}</span>
             </div>
 
-            {/* Ticket Number in Big Bold Gold Mono */}
-            <div className="font-mono text-3xl sm:text-4xl md:text-5xl font-black text-gold tracking-wider drop-shadow-[0_2px_12px_rgba(245,166,35,0.4)]">
+            {/* Winner Name (primary focus) */}
+            <div className="text-2xl sm:text-3xl md:text-4xl font-heading font-black text-white leading-tight">
+              {winner.registration?.fullName || 'Verified Participant'}
+            </div>
+
+            {/* Ticket Number right below Name */}
+            <div className="font-mono text-xl sm:text-2xl md:text-3xl font-black text-gold tracking-wider drop-shadow-[0_2px_12px_rgba(245,166,35,0.4)]">
               {winner.ticketNumber}
             </div>
 
-            {/* Winner Details */}
-            <div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight">
-                {winner.registration?.fullName || 'Verified Participant'}
-              </div>
-              <div className="text-xs sm:text-sm font-semibold text-sky-200/90 mt-0.5">
-                {winner.registration?.campName || 'General Delegation'}
-              </div>
+            {/* Camp underneath */}
+            <div className="text-xs sm:text-sm font-semibold text-sky-200/90">
+              {winner.registration?.campName || 'General Delegation'}
             </div>
 
             {/* Verification Code */}

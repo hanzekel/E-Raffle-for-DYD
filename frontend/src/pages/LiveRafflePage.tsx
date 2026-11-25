@@ -1,5 +1,5 @@
 // Live stage raffle draw with audience spectator mode, realtime entry pool, and stage controls
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -33,6 +33,15 @@ export const LiveRafflePage: React.FC = () => {
   const [stageVoidError, setStageVoidError] = useState('');
   const [isStageVoiding, setIsStageVoiding] = useState(false);
 
+  // Audience ledger search & pagination so thousands of entries never freeze mobile devices
+  const [ledgerSearch, setLedgerSearch] = useState('');
+  const [visibleLedgerCount, setVisibleLedgerCount] = useState(50);
+  const isDrawingRef = useRef(false);
+
+  useEffect(() => {
+    isDrawingRef.current = drawPhase === 'mixing' || drawPhase === 'selecting';
+  }, [drawPhase]);
+
   const fetchTickets = async () => {
     try {
       const res = await api.get<EligiblePoolTicket[]>('/tickets/all');
@@ -47,10 +56,12 @@ export const LiveRafflePage: React.FC = () => {
   useEffect(() => {
     fetchTickets().finally(() => setLoading(false));
 
-    // Real-time polling every 10 seconds for newly approved entries
+    // Poll every 20s for newly approved entries without interfering with active draws
     const pollInterval = setInterval(() => {
-      fetchTickets();
-    }, 10000);
+      if (!isDrawingRef.current) {
+        fetchTickets();
+      }
+    }, 20000);
 
     return () => clearInterval(pollInterval);
   }, []);
@@ -181,6 +192,17 @@ export const LiveRafflePage: React.FC = () => {
 
   // Whether active draw controls are displayed
   const isOperatorActive = isAdmin && !previewAsPublic;
+
+  const normalizedLedgerQuery = ledgerSearch.trim().toLowerCase();
+  const filteredLedgerTickets = normalizedLedgerQuery
+    ? tickets.filter((t) =>
+        t.ticketNumber.toLowerCase().includes(normalizedLedgerQuery) ||
+        t.registration.fullName.toLowerCase().includes(normalizedLedgerQuery) ||
+        t.registration.campName.toLowerCase().includes(normalizedLedgerQuery)
+      )
+    : tickets;
+  const visibleLedgerTickets = filteredLedgerTickets.slice(0, visibleLedgerCount);
+  const remainingLedgerCount = Math.max(0, filteredLedgerTickets.length - visibleLedgerTickets.length);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-3 sm:p-5 md:p-6 relative overflow-hidden pb-12">
@@ -387,7 +409,7 @@ export const LiveRafflePage: React.FC = () => {
 
       {/* Eligible Ticket Entries Ledger (Public Transparency) */}
       <section className="w-full max-w-4xl z-10">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 sm:mb-4">
           <div>
             <h2 className="font-heading font-bold text-lg sm:text-xl text-slate-900 flex items-center gap-2">
               <TicketIcon size={20} className="text-royal-blue" />
@@ -397,9 +419,22 @@ export const LiveRafflePage: React.FC = () => {
               All approved tickets in the raffle right now (names kept private).
             </p>
           </div>
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full whitespace-nowrap">
-            {tickets.length} Tickets Ready
-          </span>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="search"
+              value={ledgerSearch}
+              onChange={(e) => {
+                setLedgerSearch(e.target.value);
+                setVisibleLedgerCount(50);
+              }}
+              placeholder="Search ticket # or camp..."
+              aria-label="Search eligible raffle tickets"
+              className="flex-1 sm:w-48 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-royal-blue"
+            />
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full whitespace-nowrap">
+              {tickets.length} Ready
+            </span>
+          </div>
         </div>
 
         <div className="card overflow-hidden p-0 border border-slate-200 bg-white">
@@ -416,7 +451,7 @@ export const LiveRafflePage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {tickets.map((t) => (
+                {visibleLedgerTickets.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="p-3.5 lg:p-4 font-mono font-bold text-royal-blue text-sm">
                       {t.ticketNumber}
@@ -438,10 +473,12 @@ export const LiveRafflePage: React.FC = () => {
                     </td>
                   </tr>
                 ))}
-                {tickets.length === 0 && (
+                {visibleLedgerTickets.length === 0 && (
                   <tr>
                     <td colSpan={5} className="p-10 text-center text-slate-400">
-                      No eligible entries yet. Approved registrations will appear here in real-time.
+                      {tickets.length === 0
+                        ? 'No eligible entries yet. Approved registrations will appear here in real-time.'
+                        : 'No matching ticket found for that search.'}
                     </td>
                   </tr>
                 )}
@@ -451,7 +488,7 @@ export const LiveRafflePage: React.FC = () => {
 
           {/* Mobile Entries Card List */}
           <div className="block md:hidden divide-y divide-slate-100">
-            {tickets.map((t) => (
+            {visibleLedgerTickets.map((t) => (
               <div key={t.id} className="p-3 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-royal-blue text-sm">
@@ -471,12 +508,26 @@ export const LiveRafflePage: React.FC = () => {
                 </div>
               </div>
             ))}
-            {tickets.length === 0 && (
+            {visibleLedgerTickets.length === 0 && (
               <div className="p-6 text-center text-slate-400 text-xs">
-                No eligible entries yet.
+                {tickets.length === 0
+                  ? 'No eligible entries yet.'
+                  : 'No matching ticket found for that search.'}
               </div>
             )}
           </div>
+
+          {remainingLedgerCount > 0 && (
+            <div className="p-3 border-t border-slate-100 bg-slate-50/70 text-center">
+              <button
+                type="button"
+                onClick={() => setVisibleLedgerCount((c) => c + 50)}
+                className="text-xs font-bold text-royal-blue hover:text-midnight-navy px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"
+              >
+                Show 50 More ({remainingLedgerCount} remaining)
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

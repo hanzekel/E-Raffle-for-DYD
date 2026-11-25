@@ -56,7 +56,7 @@ async function handler(_req: any, res: any) {
 export default withMiddleware(handler, {
   methods: ['GET'],
   rateLimit: {
-    max: 120,
-    windowMinutes: 1,
+    max: 600,
+    windowMinutes: 1, // Supports 150+ concurrent audience devices on shared venue WiFi
   },
 });

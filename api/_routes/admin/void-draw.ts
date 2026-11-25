@@ -46,11 +46,12 @@ async function handler(req: any, res: any) {
   } catch (err: any) {
     if (err instanceof ApiError) throw err;
 
-    return res.status(200).json({
-      success: true,
-      message: 'Winner draw voided (mock simulation mode)',
-      data: { id: winnerId, isVoided: true, voidReason, voidedAt: new Date() },
-    });
+    console.error('Database error during draw void:', err);
+    throw new ApiError(
+      500,
+      'Unable to update the raffle vault database. Void aborted to protect draw integrity.',
+      'VAULT_DB_ERROR'
+    );
   }
 }
 

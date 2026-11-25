@@ -24,7 +24,7 @@ async function handler(req: any, res: any) {
 export default withMiddleware(handler, {
   methods: ['POST'],
   rateLimit: {
-    max: 10,
-    windowMinutes: 60, // 10 per hour
+    max: 100,
+    windowMinutes: 60, // High enough for shared camp/venue WiFi
   },
 });
